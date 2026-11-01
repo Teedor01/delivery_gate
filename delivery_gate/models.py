@@ -147,7 +147,7 @@ def _validate_value(name: str, value: Any) -> Any:
             raise ValueError(f"{name} must not be negative")
         return str(d)
     if name in DATE_NAMES:
-        date.fromisoformat(str(value)) 
+        date.fromisoformat(str(value))  
         return str(value)
     if name in ADDRESS_NAMES:
         if not isinstance(value, dict) or not set(value) <= set(ADDRESS_KEYS):
@@ -174,7 +174,7 @@ class Provenance:
     source_type: SourceType
     source_ref: str
     status: ProvStatus
-    confidence: Optional[float] = None   
+    confidence: Optional[float] = None  
     timestamp: Optional[str] = None
     text_span: Optional[str] = None
 

@@ -53,7 +53,7 @@ class Rule:
     claim_category: str
     mode: str
     sources: Tuple[SourceRef, ...]
-    raw: Dict[str, Any]         
+    raw: Dict[str, Any]        
     file_sha256: str
 
     def unknowns(self) -> Tuple[UnknownItem, ...]:

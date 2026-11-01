@@ -38,7 +38,7 @@ class EvidenceAssessment:
     interpretation: bool = False
     interpretation_note: Optional[str] = None
     needs_human_review: bool = False
-    establishes: Optional[str] = None        
+    establishes: Optional[str] = None         
     corroboration: str = "NOT_APPLICABLE"       
     paypal_acceptance: str = PAYPAL_ACCEPTANCE_NOT_ESTABLISHED
     does_not_establish: Tuple[str, ...] = (NOT_ESTABLISHED_CLAIM,)
@@ -57,7 +57,7 @@ class EvidenceAssessment:
 class GateResult:
     gate_id: str
     gate_type: str
-    outcome: str                 
+    outcome: str                     
     reason_code: str
     detail: str
     passage_ids: Tuple[str, ...]
@@ -633,7 +633,7 @@ def assess(registry: PolicyRegistry, case: Case) -> Assessment:
                            "passage_ids": list(x["passage_ids"]), "needs_human_review": res.state in ("REVIEW_ONLY", "CONFLICT")})
         expl.append(f"Exclusion {x['exclusion_id']}: {state} ({reason}).{tag(x['passage_ids'])}")
         if state == "NOT_EVALUATED":
-            unresolved.append("UNRESOLVED_EXCLUSION")   
+            unresolved.append("UNRESOLVED_EXCLUSION")  
 
     checks: List[EvidenceAssessment] = []
     for c in d["checks"]:
