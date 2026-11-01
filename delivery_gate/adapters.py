@@ -32,5 +32,5 @@ class FixtureSource:
 
 
 class PayPalSandboxSource:
-    def load_case(self, ref: str) -> Case:  # pragma: no cover
+    def load_case(self, ref: str) -> Case: 
         raise NotImplementedError("PayPal sandbox integration is Phase 2 and has not been built or tested.")
