@@ -1,0 +1,253 @@
+{
+ "case_id": "INR-FIXTURE-FILE",
+ "transaction_facts": [
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "claim_category",
+   "value": "ITEM_NOT_RECEIVED",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "currency",
+   "value": "USD",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "funding_source",
+   "value": "CARD",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "merchant_account_country",
+   "value": "US",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "physical_goods",
+   "value": true,
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "pre_order_or_made_to_order",
+   "value": false,
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "route",
+   "value": "PAYPAL_DISPUTE",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "transaction_amount",
+   "value": "1200.00",
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "TRANSACTION_FACT",
+   "name": "transaction_details_address",
+   "value": {
+    "line1": "1 Market St",
+    "city": "San Francisco",
+    "region": "CA",
+    "postal_code": "94105",
+    "country": "US"
+   },
+   "provenance": {
+    "source_type": "PAYPAL_API",
+    "source_ref": "fixture:paypal-capture-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  }
+ ],
+ "evidence": [
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "delivered_status",
+   "value": "DELIVERED",
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "delivery_date",
+   "value": "2026-10-20",
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "delivery_record",
+   "value": true,
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "recipient_address",
+   "value": {
+    "line1": "1 MARKET ST.",
+    "city": "san francisco",
+    "region": "ca",
+    "postal_code": "94105",
+    "country": "us"
+   },
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "redirect_detected",
+   "value": false,
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "response_to_paypal",
+   "value": "NO_REQUEST_OUTSTANDING",
+   "provenance": {
+    "source_type": "MERCHANT_INPUT",
+    "source_ref": "fixture:merchant-FX1",
+    "status": "MERCHANT_ASSERTED",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "shipped_after_advised_not_to_release",
+   "value": false,
+   "provenance": {
+    "source_type": "MERCHANT_INPUT",
+    "source_ref": "fixture:merchant-FX1",
+    "status": "MERCHANT_ASSERTED",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "shipped_to_transaction_address",
+   "value": true,
+   "provenance": {
+    "source_type": "MERCHANT_INPUT",
+    "source_ref": "fixture:merchant-FX1",
+    "status": "MERCHANT_ASSERTED",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  },
+  {
+   "layer": "EVIDENCE_ASSESSMENT",
+   "name": "tracking_number",
+   "value": "1Z999AA10123456784",
+   "provenance": {
+    "source_type": "CARRIER_API",
+    "source_ref": "fixture:carrier-FX1",
+    "status": "SYSTEM_RECORD",
+    "confidence": null,
+    "timestamp": null,
+    "text_span": null
+   }
+  }
+ ]
+}

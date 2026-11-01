@@ -1,0 +1,427 @@
+{
+  "rule_id": "us.sp.unauthorized",
+  "version": "0.2.0",
+  "status": "UNREVIEWED",
+  "status_note": "Raw-byte source verification has not happened; every source_hash is null. Do not mark REVIEWED until it has.",
+  "policy": "US Seller Protection (PayPal)",
+  "jurisdiction": "US",
+  "claim_category": "UNAUTHORIZED_TRANSACTION",
+  "mode": "EVALUATE",
+  "source_ids": [
+    "SP",
+    "UA",
+    "API_SELLER_PROTECTION",
+    "API_ORDERS_SP_DEF"
+  ],
+  "policy_effect": {
+    "value": "MAY_RETAIN_FULL_AMOUNT",
+    "passage_ids": [
+      "SP.effect"
+    ]
+  },
+  "eligibility_determination": {
+    "value": "PAYPAL_SOLE_DISCRETION",
+    "passage_ids": [
+      "SP.discretion"
+    ]
+  },
+  "gates": [
+    {
+      "gate_id": "unauth.gate.jurisdiction",
+      "type": "jurisdiction",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "merchant_account_country",
+      "expected": "US",
+      "passage_ids": [
+        "SP.basic.us_address"
+      ]
+    },
+    {
+      "gate_id": "unauth.gate.route",
+      "type": "route",
+      "kind": "EXPLICIT_CONDITION",
+      "passage_ids": [
+        "SP.scope.unauthorized",
+        "SP.scope.reversal"
+      ],
+      "fact": "route",
+      "funding_fact": "funding_source",
+      "actions": {
+        "PAYPAL_DISPUTE": {
+          "action": "EVALUATE",
+          "passage_ids": [
+            "SP.scope.unauthorized"
+          ],
+          "note": "Seller Protection may apply to unauthorized-transaction claims in an environment hosted by PayPal; requirements still apply."
+        },
+        "CARD_ISSUER_CHARGEBACK": {
+          "action": "EVALUATE_WITH_OPEN_ITEM",
+          "passage_ids": [
+            "SP.scope.reversal"
+          ],
+          "note": "Seller Protection may also apply when a card payment is reversed by a successful chargeback for non-authorization. Whether the PayPal-hosted-environment condition also applies is unknown.",
+          "open_item": {
+            "id": "unauth.open.hosted_environment_for_chargebacks",
+            "text": "Whether the 'PayPal-hosted environment' condition applies to chargeback reversals is not stated."
+          }
+        },
+        "OTHER_UNKNOWN": {
+          "action": "UNKNOWN",
+          "passage_ids": [
+            "SP.scope.reversal"
+          ],
+          "note": "The policy text retrieved does not establish handling for other routes."
+        }
+      },
+      "funding_consistency": {
+        "allowed": {
+          "CARD_ISSUER_CHARGEBACK": [
+            "CARD"
+          ]
+        },
+        "interpretation": true,
+        "interpretation_note": "That an issuer chargeback implies card funding is an inference, not a quoted rule. Conflicting inputs return UNKNOWN."
+      }
+    },
+    {
+      "gate_id": "unauth.gate.goods_scope",
+      "type": "goods_scope",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "physical_goods",
+      "passage_ids": [
+        "SP.basic.physical"
+      ],
+      "out_of_scope_note": "Intangible goods carry additional requirements that Phase 1 does not model."
+    }
+  ],
+  "exclusions": [
+    {
+      "exclusion_id": "unauth.excl.shipped_after_advised_not_to_release",
+      "kind": "EXCLUSION",
+      "evidence": "shipped_after_advised_not_to_release",
+      "triggered_when": true,
+      "passage_ids": [
+        "SP.excl.do_not_release"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check_id": "unauth.proof.record",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "Valid proof of shipment or proof of delivery from a shipping company is required.",
+      "evaluator": "record_present",
+      "params": {
+        "evidence": [
+          "shipment_record",
+          "delivery_record"
+        ],
+        "carrier_source_types": [
+          "CARRIER_DOCUMENT",
+          "CARRIER_API"
+        ]
+      },
+      "passage_ids": [
+        "SP.unauth.two_days",
+        "SP.basic.proof"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Treating a carrier API payload or carrier document as the 'shipping-company documentation' the policy names is an interpretation about what the artifact is. It is NOT a finding that PayPal accepts the artifact as sufficient proof. Merchant statements are never treated as the record.",
+      "establishes": "a shipment or delivery record is present from a shipping-company source type",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.proof.tracking_number",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The shipment or delivery documentation includes a tracking number.",
+      "evaluator": "value_present",
+      "params": {
+        "evidence": [
+          "tracking_number"
+        ]
+      },
+      "passage_ids": [
+        "SP.proof.tracking"
+      ],
+      "interpretation": true,
+      "interpretation_note": "The proof-contents list is stated for the proof-of-delivery section; applying it to unauthorized proof of shipment is an interpretation. Only presence is checked.",
+      "establishes": "the carrier record contains a tracking number (presence only; verifiability not assessed)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.proof.date",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The documentation carries a shipment or delivery date.",
+      "evaluator": "value_present",
+      "params": {
+        "evidence": [
+          "shipment_date",
+          "delivery_date"
+        ]
+      },
+      "passage_ids": [
+        "SP.unauth.two_days"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Presence of a date is checked. No comparison against any deadline is made.",
+      "establishes": "the carrier record contains a shipment or delivery date (no deadline comparison is made)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.proof.recipient_address_granularity",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The recipient address shows at least city/state, city/country, or postal code.",
+      "evaluator": "address_granularity",
+      "params": {
+        "evidence": "recipient_address",
+        "min_granularity": [
+          [
+            "city",
+            "region"
+          ],
+          [
+            "city",
+            "country"
+          ],
+          [
+            "postal_code"
+          ]
+        ]
+      },
+      "passage_ids": [
+        "SP.proof.address_min"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Stated for proof of delivery; applying it to proof of shipment is an interpretation.",
+      "establishes": "carrier_record recipient address carries at least city/state, city/country or a postal code",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.proof.recipient_address_matches",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The recipient address matches the shipping address on the Transaction Details page.",
+      "evaluator": "address_matches",
+      "params": {
+        "evidence": "recipient_address",
+        "fact": "transaction_details_address"
+      },
+      "passage_ids": [
+        "SP.proof.address_match"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Equality after case/punctuation/whitespace normalisation; no fuzzy matching. Mismatches are flagged for human review.",
+      "establishes": "carrier_record recipient address equals the Transaction Details address after exact normalisation",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.ship_to_transaction_address",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The item must be shipped to the shipping address on the Transaction Details page.",
+      "evaluator": "ship_to_address",
+      "params": {
+        "assertion": "shipped_to_transaction_address",
+        "evidence": "recipient_address",
+        "fact": "transaction_details_address"
+      },
+      "passage_ids": [
+        "SP.basic.ship_to_txn_address"
+      ],
+      "establishes": "shipment destination equals the Transaction Details address (derived from the recipient address, or merchant-asserted when no comparable address exists)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.no_redirect",
+      "kind": "EXPLICIT_CONDITION",
+      "description": "A shipment later redirected to a different address is not eligible.",
+      "evaluator": "negative_condition",
+      "params": {
+        "evidence": "redirect_detected"
+      },
+      "passage_ids": [
+        "SP.basic.redirect"
+      ],
+      "establishes": "redirect_detected is False as supplied (no redirect reported)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.timely_response",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The seller must respond to PayPal's requests for documentation in the time requested.",
+      "evaluator": "enum_in",
+      "params": {
+        "evidence": "response_to_paypal",
+        "allowed": [
+          "NO_REQUEST_OUTSTANDING",
+          "RESPONDED_WITHIN_REQUESTED_TIME"
+        ],
+        "contradicted": [
+          "RESPONSE_LATE_OR_MISSING"
+        ]
+      },
+      "passage_ids": [
+        "SP.basic.respond"
+      ],
+      "interpretation": true,
+      "interpretation_note": "The length of 'the time requested' is unknown to the engine. It consumes a status and computes nothing.",
+      "establishes": "response_to_paypal was supplied as no request outstanding or responded within the requested time (supplied status; the requested time is unknown)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "unauth.preorder_ship_timing",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "Pre-ordered or made-to-order goods must ship within the timeframe specified in the listing.",
+      "evaluator": "conditional_enum",
+      "params": {
+        "flag": "pre_order_or_made_to_order",
+        "evidence": "shipment_timing",
+        "required": "WITHIN_LISTED_TIMEFRAME",
+        "contradicted": [
+          "OUTSIDE_LISTED_TIMEFRAME"
+        ]
+      },
+      "passage_ids": [
+        "SP.basic.ship_timing"
+      ],
+      "establishes": "shipment_timing was supplied as within the listed timeframe (supplied status)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    }
+  ],
+  "open_requirements": [
+    {
+      "open_id": "unauth.timing_requirement",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "Proof must show the item was shipped or provided no later than two days after PayPal notified the seller of the dispute or reversal. The clock semantics are not established, so no timer is computed.",
+      "evaluator": "open_timing",
+      "params": {
+        "notification": "paypal_notification_timestamp",
+        "shipment": "shipment_timestamp"
+      },
+      "passage_ids": [
+        "SP.unauth.two_days"
+      ]
+    }
+  ],
+  "not_modeled": [
+    {
+      "id": "hosted_environment",
+      "reason": "Scope of 'an environment hosted by PayPal' for merchant integrations is unknown.",
+      "passage_ids": [
+        "SP.scope.unauthorized"
+      ]
+    },
+    {
+      "id": "checkout_integration",
+      "reason": "Current Checkout version and session-information requirements; no verification method is known.",
+      "passage_ids": [
+        "SP.basic.checkout_version",
+        "SP.basic.session_info"
+      ]
+    },
+    {
+      "id": "signature_confirmation",
+      "reason": "UNVERIFIED: DO NOT MODEL. No signature requirement or amount threshold appears in the current primary sources retrieved.",
+      "passage_ids": []
+    },
+    {
+      "id": "buyer_filing_deadline",
+      "reason": "UNVERIFIED: DO NOT MODEL. No clean filing deadline for unauthorized claims was established.",
+      "passage_ids": []
+    },
+    {
+      "id": "seven_day_shipping_recommendation",
+      "reason": "Worded as a recommendation with no stated consequence.",
+      "passage_ids": [
+        "SP.basic.ship_timing"
+      ]
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "status_value_meanings",
+      "text": "The meanings of the three API status values are not defined in the current primary documentation retrieved.",
+      "passage_ids": [
+        "API.sp.status_desc",
+        "API.sp.status_values"
+      ]
+    },
+    {
+      "id": "status_to_mark_mapping",
+      "text": "That the API status equals the Transaction Details mark named in the policy is an inference.",
+      "passage_ids": [
+        "SP.unauth.marked"
+      ]
+    },
+    {
+      "id": "two_day_clock",
+      "text": "Calendar versus business days, the notification channel and the time zone for the two-day requirement are not stated.",
+      "passage_ids": [
+        "SP.unauth.two_days"
+      ]
+    },
+    {
+      "id": "evidence_sufficiency",
+      "text": "Whether evidence meeting the listed contents is sufficient is decided by PayPal.",
+      "passage_ids": [
+        "SP.discretion"
+      ]
+    },
+    {
+      "id": "dispute_fee_amounts",
+      "text": "Dispute fee amounts were not retrieved.",
+      "passage_ids": [
+        "UA.dispute_fee.applies"
+      ]
+    }
+  ],
+  "policy_conditions": [
+    {
+      "condition_id": "unauth.condition.paypal_mark",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "paypal_seller_protection_status",
+      "description": "The policy requires the payment to be marked 'eligible' or 'partially eligible' on the Transaction Details page.",
+      "passage_ids": [
+        "SP.unauth.marked"
+      ],
+      "status_semantics": "UNKNOWN",
+      "mapping": {
+        "established": false,
+        "reviewed_passage_ids": [
+          "API.sp.status_desc",
+          "API.sp.status_values",
+          "SP.unauth.marked"
+        ],
+        "establishing_passage_ids": [],
+        "satisfied_values": [],
+        "unsatisfied_values": [],
+        "note": "The API status field is stored as an opaque PayPal value. No primary document retrieved establishes that it equals the Transaction Details mark named by the policy, so no status value satisfies or fails this condition."
+      }
+    }
+  ]
+}
