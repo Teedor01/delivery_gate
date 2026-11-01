@@ -1,0 +1,50 @@
+{
+ "SP": {
+  "title": "PayPal's Seller Protection Program",
+  "url": "https://www.paypal.com/us/legalhub/paypal/seller-protection",
+  "last_updated": "Last updated on January 26, 2026",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ },
+ "PP": {
+  "title": "PayPal's Purchase Protection Program",
+  "url": "https://www.paypal.com/us/legalhub/paypal/buyer-protection",
+  "last_updated": "Last updated on January 26, 2026",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ },
+ "UA": {
+  "title": "PAYPAL USER AGREEMENT",
+  "url": "https://www.paypal.com/legalhub/useragreement-full",
+  "last_updated": "Last updated on September 14, 2026 (fetched text truncated mid 'Remittance Transfer Errors')",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ },
+ "API_CAPTURE": {
+  "title": "capture - Payments v2 (PayPal Developer)",
+  "url": "https://developer.paypal.com/api/payments/v2/definitions/capture",
+  "last_updated": "no last-updated date on page",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ },
+ "API_SELLER_PROTECTION": {
+  "title": "seller_protection - Payments v2 (PayPal Developer)",
+  "url": "https://developer.paypal.com/api/payments/v2/definitions/seller_protection",
+  "last_updated": "no last-updated date on page",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ },
+ "API_ORDERS_SP_DEF": {
+  "title": "seller_protection - Orders v2 (PayPal Developer)",
+  "url": "https://developer.paypal.com/api/orders/v2/definitions/seller_protection",
+  "last_updated": "no last-updated date on page",
+  "retrieved_at": "2026-10-28",
+  "source_hash": null,
+  "hash_status": "NOT_OBTAINED_RAW_BYTES"
+ }
+}

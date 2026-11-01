@@ -1,0 +1,385 @@
+{
+  "rule_id": "us.sp.inr",
+  "version": "0.2.0",
+  "status": "UNREVIEWED",
+  "status_note": "Raw-byte source verification has not happened; every source_hash is null. Do not mark REVIEWED until it has.",
+  "policy": "US Seller Protection (PayPal)",
+  "jurisdiction": "US",
+  "claim_category": "ITEM_NOT_RECEIVED",
+  "mode": "EVALUATE",
+  "source_ids": [
+    "SP",
+    "PP",
+    "UA"
+  ],
+  "policy_effect": {
+    "value": "MAY_RETAIN_FULL_AMOUNT",
+    "passage_ids": [
+      "SP.effect"
+    ]
+  },
+  "eligibility_determination": {
+    "value": "PAYPAL_SOLE_DISCRETION",
+    "passage_ids": [
+      "SP.discretion"
+    ]
+  },
+  "gates": [
+    {
+      "gate_id": "inr.gate.jurisdiction",
+      "type": "jurisdiction",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "merchant_account_country",
+      "expected": "US",
+      "passage_ids": [
+        "SP.basic.us_address"
+      ]
+    },
+    {
+      "gate_id": "inr.gate.route",
+      "type": "route",
+      "kind": "EXPLICIT_CONDITION",
+      "passage_ids": [
+        "SP.scope.inr"
+      ],
+      "fact": "route",
+      "funding_fact": "funding_source",
+      "actions": {
+        "PAYPAL_DISPUTE": {
+          "action": "EVALUATE",
+          "passage_ids": [
+            "SP.scope.inr"
+          ],
+          "note": "Seller Protection may apply to INR claims that are not card-issuer chargebacks; the listed requirements still apply."
+        },
+        "CARD_ISSUER_CHARGEBACK": {
+          "action": "NOT_COVERED",
+          "passage_ids": [
+            "SP.scope.inr",
+            "SP.excl.inr_issuer",
+            "UA.invalidate.chargeback",
+            "UA.issuer_decides"
+          ],
+          "note": "INR claims filed with the card issuer are excluded from Seller Protection; the issuer, not PayPal, decides the chargeback."
+        },
+        "OTHER_UNKNOWN": {
+          "action": "UNKNOWN",
+          "passage_ids": [
+            "SP.scope.reversal"
+          ],
+          "note": "The policy text retrieved does not establish INR handling for other routes (for example bank reversals)."
+        }
+      },
+      "funding_consistency": {
+        "allowed": {
+          "CARD_ISSUER_CHARGEBACK": [
+            "CARD"
+          ]
+        },
+        "interpretation": true,
+        "interpretation_note": "That an issuer chargeback implies card funding is an inference, not a quoted rule. Conflicting inputs return UNKNOWN."
+      }
+    },
+    {
+      "gate_id": "inr.gate.goods_scope",
+      "type": "goods_scope",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "physical_goods",
+      "passage_ids": [
+        "SP.basic.physical"
+      ],
+      "out_of_scope_note": "Intangible goods carry additional requirements that Phase 1 does not model."
+    }
+  ],
+  "exclusions": [
+    {
+      "exclusion_id": "inr.excl.shipped_after_advised_not_to_release",
+      "kind": "EXCLUSION",
+      "evidence": "shipped_after_advised_not_to_release",
+      "triggered_when": true,
+      "passage_ids": [
+        "SP.excl.do_not_release"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check_id": "inr.proof_of_delivery.record",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "Proof of delivery is required for INR, as documentation from a shipping company.",
+      "evaluator": "record_present",
+      "params": {
+        "evidence": [
+          "delivery_record"
+        ],
+        "carrier_source_types": [
+          "CARRIER_DOCUMENT",
+          "CARRIER_API"
+        ]
+      },
+      "passage_ids": [
+        "SP.inr.additional",
+        "SP.basic.proof"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Treating a carrier API payload or carrier document as the 'shipping-company documentation' the policy names is an interpretation about what the artifact is. It is NOT a finding that PayPal accepts the artifact as sufficient proof. Merchant statements are never treated as the record.",
+      "establishes": "carrier_record is present from a shipping-company source type",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.proof_of_delivery.tracking_number",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The delivery documentation includes a tracking number.",
+      "evaluator": "value_present",
+      "params": {
+        "evidence": [
+          "tracking_number"
+        ]
+      },
+      "passage_ids": [
+        "SP.proof.tracking"
+      ],
+      "interpretation": true,
+      "interpretation_note": "Only presence is checked. Whether a tracking number is 'online and verifiable' is not verifiable here.",
+      "establishes": "carrier_record contains a tracking number (presence only; verifiability not assessed)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.proof_of_delivery.date_and_status",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The delivery documentation shows a delivery date and a 'delivered' status.",
+      "evaluator": "delivery_date_and_status",
+      "params": {
+        "date": "delivery_date",
+        "status": "delivered_status",
+        "delivered_value": "DELIVERED"
+      },
+      "passage_ids": [
+        "SP.proof.delivery_status"
+      ],
+      "establishes": "carrier_record contains a delivery date and a 'delivered' status",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.proof_of_delivery.recipient_address_granularity",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The recipient address shows at least city/state, city/country, or postal code.",
+      "evaluator": "address_granularity",
+      "params": {
+        "evidence": "recipient_address",
+        "min_granularity": [
+          [
+            "city",
+            "region"
+          ],
+          [
+            "city",
+            "country"
+          ],
+          [
+            "postal_code"
+          ]
+        ]
+      },
+      "passage_ids": [
+        "SP.proof.address_min"
+      ],
+      "establishes": "carrier_record recipient address carries at least city/state, city/country or a postal code",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.proof_of_delivery.recipient_address_matches",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The recipient address matches the shipping address on the Transaction Details page.",
+      "evaluator": "address_matches",
+      "params": {
+        "evidence": "recipient_address",
+        "fact": "transaction_details_address"
+      },
+      "passage_ids": [
+        "SP.proof.address_match"
+      ],
+      "interpretation": true,
+      "interpretation_note": "'Matches' is implemented as equality after case/punctuation/whitespace normalisation of every field present on the Transaction Details address. No abbreviation expansion or fuzzy matching; mismatches are flagged for human review.",
+      "establishes": "carrier_record recipient address equals the Transaction Details address after exact normalisation",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.ship_to_transaction_address",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The item must be shipped to the shipping address on the Transaction Details page.",
+      "evaluator": "ship_to_address",
+      "params": {
+        "assertion": "shipped_to_transaction_address",
+        "evidence": "recipient_address",
+        "fact": "transaction_details_address"
+      },
+      "passage_ids": [
+        "SP.basic.ship_to_txn_address"
+      ],
+      "establishes": "shipment destination equals the Transaction Details address (derived from the recipient address, or merchant-asserted when no comparable address exists)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.no_redirect",
+      "kind": "EXPLICIT_CONDITION",
+      "description": "A shipment later redirected to a different address is not eligible.",
+      "evaluator": "negative_condition",
+      "params": {
+        "evidence": "redirect_detected"
+      },
+      "passage_ids": [
+        "SP.basic.redirect"
+      ],
+      "establishes": "redirect_detected is False as supplied (no redirect reported)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.timely_response",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "The seller must respond to PayPal's requests for documentation in the time requested.",
+      "evaluator": "enum_in",
+      "params": {
+        "evidence": "response_to_paypal",
+        "allowed": [
+          "NO_REQUEST_OUTSTANDING",
+          "RESPONDED_WITHIN_REQUESTED_TIME"
+        ],
+        "contradicted": [
+          "RESPONSE_LATE_OR_MISSING"
+        ]
+      },
+      "passage_ids": [
+        "SP.basic.respond"
+      ],
+      "interpretation": true,
+      "interpretation_note": "The length of 'the time requested' is unknown to the engine. It consumes a merchant/PayPal-correspondence status and computes nothing.",
+      "establishes": "response_to_paypal was supplied as no request outstanding or responded within the requested time (supplied status; the requested time is unknown)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    },
+    {
+      "check_id": "inr.preorder_ship_timing",
+      "kind": "EXPLICIT_REQUIREMENT",
+      "description": "Pre-ordered or made-to-order goods must ship within the timeframe specified in the listing.",
+      "evaluator": "conditional_enum",
+      "params": {
+        "flag": "pre_order_or_made_to_order",
+        "evidence": "shipment_timing",
+        "required": "WITHIN_LISTED_TIMEFRAME",
+        "contradicted": [
+          "OUTSIDE_LISTED_TIMEFRAME"
+        ]
+      },
+      "passage_ids": [
+        "SP.basic.ship_timing"
+      ],
+      "establishes": "shipment_timing was supplied as within the listed timeframe (supplied status)",
+      "sufficiency_stated_by_policy": false,
+      "does_not_establish": [
+        "PAYPAL_ACCEPTS_THIS_ARTIFACT_AS_SUFFICIENT_PROOF"
+      ]
+    }
+  ],
+  "open_requirements": [],
+  "not_modeled": [
+    {
+      "id": "checkout_integration",
+      "reason": "Current Checkout version and session-information requirements apply to Business Sellers who integrated Checkout; no verification method is known.",
+      "passage_ids": [
+        "SP.basic.checkout_version",
+        "SP.basic.session_info"
+      ]
+    },
+    {
+      "id": "signature_confirmation",
+      "reason": "UNVERIFIED: DO NOT MODEL. No signature requirement or amount threshold appears in the current primary sources retrieved.",
+      "passage_ids": []
+    },
+    {
+      "id": "seven_day_shipping_recommendation",
+      "reason": "Worded as a recommendation with no stated consequence.",
+      "passage_ids": [
+        "SP.basic.ship_timing"
+      ]
+    },
+    {
+      "id": "excluded_item_categories",
+      "reason": "The ineligible-category list is not modeled in Phase 1.",
+      "passage_ids": []
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "evidence_sufficiency",
+      "text": "Whether evidence meeting the listed contents is sufficient is decided by PayPal.",
+      "passage_ids": [
+        "SP.discretion"
+      ]
+    },
+    {
+      "id": "tracking_number_verifiability",
+      "text": "How a tracking number is judged 'online and verifiable' is not defined.",
+      "passage_ids": [
+        "SP.proof.tracking"
+      ]
+    },
+    {
+      "id": "purchase_protection_interplay",
+      "text": "How Purchase Protection's INR denial on seller proof of shipment or delivery combines with Seller Protection in a single claim is not stated.",
+      "passage_ids": [
+        "PP.inr.proof_denies"
+      ]
+    },
+    {
+      "id": "balance_funded_effect",
+      "text": "The effect of PayPal-balance funding on INR protection is not addressed in the sources retrieved.",
+      "passage_ids": []
+    },
+    {
+      "id": "bank_reversal_inr",
+      "text": "Whether bank reversals for INR-type reasons are covered is not stated.",
+      "passage_ids": [
+        "SP.scope.reversal"
+      ]
+    },
+    {
+      "id": "response_time_length",
+      "text": "The length of 'the time requested' for responding to PayPal is not stated.",
+      "passage_ids": [
+        "SP.basic.respond"
+      ]
+    },
+    {
+      "id": "dispute_fee_amounts",
+      "text": "Dispute fee amounts were not retrieved.",
+      "passage_ids": [
+        "UA.dispute_fee.applies"
+      ]
+    }
+  ],
+  "policy_conditions": []
+}

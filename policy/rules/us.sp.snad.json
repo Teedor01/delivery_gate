@@ -1,0 +1,123 @@
+{
+  "rule_id": "us.sp.snad",
+  "version": "0.2.0",
+  "status": "UNREVIEWED",
+  "status_note": "Raw-byte source verification has not happened; every source_hash is null. Do not mark REVIEWED until it has.",
+  "policy": "US Seller Protection (PayPal)",
+  "jurisdiction": "US",
+  "claim_category": "SIGNIFICANTLY_NOT_AS_DESCRIBED",
+  "mode": "NOT_COVERED",
+  "source_ids": [
+    "SP",
+    "PP",
+    "UA"
+  ],
+  "policy_effect": {
+    "value": "NOT_COVERED",
+    "passage_ids": [
+      "SP.excl.snad"
+    ]
+  },
+  "eligibility_determination": {
+    "value": "NOT_APPLICABLE_EXCLUDED_CATEGORY",
+    "passage_ids": [
+      "SP.excl.snad"
+    ]
+  },
+  "gates": [
+    {
+      "gate_id": "snad.gate.jurisdiction",
+      "type": "jurisdiction",
+      "kind": "EXPLICIT_CONDITION",
+      "fact": "merchant_account_country",
+      "expected": "US",
+      "passage_ids": [
+        "SP.basic.us_address"
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "exclusion_id": "snad.excl.category",
+      "kind": "EXCLUSION",
+      "evidence": null,
+      "triggered_when": null,
+      "passage_ids": [
+        "SP.excl.snad"
+      ],
+      "note": "Category-level exclusion: SNAD claims are excluded whether filed with PayPal or the card issuer. No requirement or evidence check is run."
+    }
+  ],
+  "checks": [],
+  "open_requirements": [],
+  "exposure_model": {
+    "floor_fact": "transaction_amount",
+    "floor_passage_ids": [
+      "UA.snad.forfeit",
+      "UA.liable"
+    ],
+    "floor_note": "The transaction amount is a conservative lower bound only. Whether the original shipping cost sits inside the transaction amount is unknown.",
+    "documented_cost_types": [
+      {
+        "cost_id": "paypal_fees_not_refunded",
+        "fact": "paypal_fee_amount",
+        "passage_ids": [
+          "UA.snad.fees"
+        ],
+        "condition": "STATED",
+        "additive_to_floor": "UNKNOWN",
+        "note": "Fees are not refunded, but whether they overlap the floor is not established, so they are never summed into the lower bound."
+      },
+      {
+        "cost_id": "return_shipping",
+        "fact": "return_shipping_cost",
+        "passage_ids": [
+          "UA.snad.return"
+        ],
+        "condition": "MAY_APPLY",
+        "additive_to_floor": true,
+        "note": "The seller may be required to accept the item back and pay return shipping."
+      },
+      {
+        "cost_id": "dispute_fee",
+        "fact": "dispute_fee_amount",
+        "passage_ids": [
+          "UA.dispute_fee.applies"
+        ],
+        "condition": "STATED",
+        "additive_to_floor": true,
+        "note": "Dispute fee amounts were not retrieved."
+      }
+    ],
+    "total_exposure": "UNBOUNDED_BY_CURRENT_MODEL"
+  },
+  "not_modeled": [
+    {
+      "id": "claim_merits",
+      "reason": "Whether a SNAD claim succeeds depends on merits that no sourced rule can score. No probability is produced.",
+      "passage_ids": []
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "dispute_fee_amounts",
+      "text": "Dispute fee amounts were not retrieved.",
+      "passage_ids": [
+        "UA.dispute_fee.applies"
+      ]
+    },
+    {
+      "id": "shipping_inside_amount",
+      "text": "Whether the original shipping cost is included in the transaction amount is unknown.",
+      "passage_ids": [
+        "UA.snad.forfeit"
+      ]
+    },
+    {
+      "id": "other_costs",
+      "text": "Costs beyond those documented may exist; the model does not bound total exposure.",
+      "passage_ids": []
+    }
+  ],
+  "policy_conditions": []
+}

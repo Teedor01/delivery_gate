@@ -1,0 +1,281 @@
+{
+ "normalization": "Hash input = my transcription of the passage as UTF-8: markdown/link/bold syntax stripped, table cell breaks and <br> removed, whitespace collapsed, no space before punctuation, curly/straight quotes kept as they appeared in the fetched text. This is NOT a hash of raw page bytes (the fetch tool returns extracted text; sandbox has no network). To audit: download raw page, locate the passage under section_locator, apply same normalization, compare SHA-256. Mismatch = transcription error by me (or a policy change), not proof of anything else.",
+ "verbatim_text": "intentionally not stored; ingest from raw page and verify hash",
+ "passages": {
+  "SP.scope.unauthorized": {
+   "source": "SP",
+   "section_locator": "What's Eligible",
+   "passage_sha256": "e0c93bef8940b567edadc2da1ff15e0b8cbab7e3bd9534d0e74274126de1eeb6"
+  },
+  "SP.scope.inr": {
+   "source": "SP",
+   "section_locator": "What's Eligible",
+   "passage_sha256": "283436afb827ed0bcddf8841dbfe3c0baa03ffb1f6086bab26af88d6a90b8f09"
+  },
+  "SP.scope.reversal": {
+   "source": "SP",
+   "section_locator": "What's Eligible",
+   "passage_sha256": "d33411068d34adc2d1a97c283b36b9d9b176a8badccd676ead2c3cb1fae69b69"
+  },
+  "SP.discretion": {
+   "source": "SP",
+   "section_locator": "What's Eligible",
+   "passage_sha256": "4466e5d8335cf9a9f11dbc2537b05b32a25831020f65fc7f1e4572c0ff574735"
+  },
+  "SP.effect": {
+   "source": "SP",
+   "section_locator": "What's Eligible",
+   "passage_sha256": "36b8f5486ffaeac895b25c17027e27b3b7d492f69fff705a2f88471b178ffc88"
+  },
+  "SP.basic.us_address": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "684184a2c7d577e7cefaf2e9ef9a110351af787972972d7328dc7a2433d465ec"
+  },
+  "SP.basic.physical": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "a63da8829b022d39b8ec575f82fe225630838e6809b59f1e52def892aa649719"
+  },
+  "SP.basic.ship_to_txn_address": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "135096f918ae7ff0d812d13b4ab5bf967a6c6f216153ae17c3f2f6a8f0454039"
+  },
+  "SP.basic.redirect": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "43a651111dbab42907b47f89a88319dce6446dd3478920a716e0cfb56952bbaf"
+  },
+  "SP.basic.respond": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "8ef9cd6ac1a2c7079af82f08aa98b508af2526da287b24759dfba68ae8460ceb"
+  },
+  "SP.basic.ship_timing": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "685e23a972aff5f54dc4f2d695cfcdf999660655b1dfee6f6df7e7b0328d366a"
+  },
+  "SP.basic.proof": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "9b3c786559915dd49d9ef2c9c46cffecfc9022ea9e958d074de26baed4aeabee"
+  },
+  "SP.basic.checkout_version": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "aa9287ff39d939485fc95e9469fac56dc62ec6729abc9ca56dd808b4fab1e82f"
+  },
+  "SP.basic.session_info": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "45763abba2a8f98723c95fccee9428e2be90d31a875bd26736dd0d425f198ce4"
+  },
+  "SP.unauth.marked": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "309d4b4027e3526e4489df6d93b92e6c3d01c5b00eb0c2861f00243ba2a6d77b"
+  },
+  "SP.unauth.two_days": {
+   "source": "SP",
+   "section_locator": "Basic Requirements",
+   "passage_sha256": "9c2322ac72ab3877eb1048f4329a39d9f230c7bfc66caf5c579999a3113ed1a9"
+  },
+  "SP.inr.additional": {
+   "source": "SP",
+   "section_locator": "Item Not Received Additional Requirement",
+   "passage_sha256": "eaa7e8ffbc4f819bb9971a6c478a5c9042cfd1f99c887e4163fed490b40b7b4a"
+  },
+  "SP.proof.delivery_status": {
+   "source": "SP",
+   "section_locator": "Establishing Proof of Shipment or Proof of Delivery",
+   "passage_sha256": "0db939b19a455b52b5e77ba1fffe902c452de418e4199839951177cb193fc1d1"
+  },
+  "SP.proof.address_match": {
+   "source": "SP",
+   "section_locator": "Establishing Proof of Shipment or Proof of Delivery",
+   "passage_sha256": "e8d1bb4b1924773dda287eeddd833aea9b133a864ef40f7b211ee05673f971ec"
+  },
+  "SP.proof.carrier_choice": {
+   "source": "SP",
+   "section_locator": "Establishing Proof of Shipment or Proof of Delivery",
+   "passage_sha256": "996ba77ae891c10d59f3f0e6fe93e9906f73bde8f06f57414dd7bf30ef766768"
+  },
+  "SP.intangible.proof": {
+   "source": "SP",
+   "section_locator": "Intangible Goods Additional Requirements / Establishing Proof...",
+   "passage_sha256": "cb25f8d43966d25606498a12d7f428b1c849480410b5e120f73cc4630ceabb07"
+  },
+  "SP.intangible.unauth": {
+   "source": "SP",
+   "section_locator": "Intangible Goods Additional Requirements / Establishing Proof...",
+   "passage_sha256": "0dbcd2a95b0ebfe73eb8ee98a996da9ff5bc95f196427fb1aa1ae8a4a81d7fce"
+  },
+  "SP.excl.snad": {
+   "source": "SP",
+   "section_locator": "Ineligible Items and Transactions",
+   "passage_sha256": "6636063619202e60226f042157ce9ebdae16407acb67131ac17ca613dec76562"
+  },
+  "SP.excl.inr_issuer": {
+   "source": "SP",
+   "section_locator": "Ineligible Items and Transactions",
+   "passage_sha256": "58dff0f6c4b52b35625d0cbf0c22e439fb4507f437cb93f4c9c0481e7f42a92f"
+  },
+  "SP.excl.do_not_release": {
+   "source": "SP",
+   "section_locator": "Ineligible Items and Transactions",
+   "passage_sha256": "da03a5d2eeb9d7cc2bfd2d9295a977e8c1c6dd4554245f6a2ebc4d3a60e211f4"
+  },
+  "SP.guest_checkout": {
+   "source": "SP",
+   "section_locator": "Ineligible Items and Transactions",
+   "passage_sha256": "035e9a22d24bf74b07ce66786bbe9de76a664a7ae354754143e4fbb2ee81046e"
+  },
+  "PP.window.inr": {
+   "source": "PP",
+   "section_locator": "Opening Disputes: Timeframes",
+   "passage_sha256": "6bce6ebe0bc3a53796b0baf82d6a1f227f8cd3912aa6e4d48652c750720a424c"
+  },
+  "PP.window.snad": {
+   "source": "PP",
+   "section_locator": "Opening Disputes: Timeframes",
+   "passage_sha256": "aa35e4b0d771096efc023159d665b37a6a739d189ff07ef2f9506adad5d4c647"
+  },
+  "PP.inr.proof_denies": {
+   "source": "PP",
+   "section_locator": "Item Not Received Claims",
+   "passage_sha256": "a4d6669ebdb37737073d29a2ca4958ad3cbe6f931552b601e5e9d54e33b7b1a2"
+  },
+  "PP.route.choose_one": {
+   "source": "PP",
+   "section_locator": "Dispute with PayPal or Your Card Issuer",
+   "passage_sha256": "343e989a7165dbb0e5322ee27f14eb1ac976a861ea10c068bc0692d5729e1f1e"
+  },
+  "PP.route.close": {
+   "source": "PP",
+   "section_locator": "Dispute with PayPal or Your Card Issuer",
+   "passage_sha256": "b9bb6fa8b8029ab97ddfacd8a109cc03541910042a5649a7f008d92504b92df8"
+  },
+  "PP.route.later": {
+   "source": "PP",
+   "section_locator": "Dispute with PayPal or Your Card Issuer",
+   "passage_sha256": "e600359d4e62ff3c335b06691d9d2da1210accef5e99f145c5845e867242ddd4"
+  },
+  "PP.route.broader": {
+   "source": "PP",
+   "section_locator": "Dispute with PayPal or Your Card Issuer",
+   "passage_sha256": "a9df85f2414f9518360b855ebd4f4d3242af1b04eeaffd20364a26f67b470a6c"
+  },
+  "PP.process.escalate": {
+   "source": "PP",
+   "section_locator": "Online Dispute Resolution Process",
+   "passage_sha256": "6d17413f2e4c1553aa1d4fc5ddaa82ded6246974d6509a8eeea9e32e0009c3cc"
+  },
+  "PP.process.hold": {
+   "source": "PP",
+   "section_locator": "Online Dispute Resolution Process",
+   "passage_sha256": "79b7d051b26f70479821973a8e92e930df9cea464cf364b8dda0cc09190dc050"
+  },
+  "PP.process.final": {
+   "source": "PP",
+   "section_locator": "Online Dispute Resolution Process",
+   "passage_sha256": "808db6b7f90b7310a8047cbfddc70b0f1af729a307844adf158bff9eaa4de6cf"
+  },
+  "UA.issuer_decides": {
+   "source": "UA",
+   "section_locator": "Refunds, Reversals and Chargebacks > Payments that are invalidated and reversed",
+   "passage_sha256": "314e82a65210d1e5bf36483c3eb57e11f1d3b5c43c15f3a6f0a0755a86d2e09b"
+  },
+  "UA.invalidate.chargeback": {
+   "source": "UA",
+   "section_locator": "Refunds, Reversals and Chargebacks > Payments that are invalidated and reversed",
+   "passage_sha256": "902884c8247a60435db29ff0c23fd70859de54f3c992931505389bfce4d17310"
+  },
+  "UA.liable": {
+   "source": "UA",
+   "section_locator": "Refunds, Reversals and Chargebacks > Payments that are invalidated and reversed",
+   "passage_sha256": "40e64ed71729e9bd9f164955e8904a1e30a44c05e7525a601f382ecbb308d5f1"
+  },
+  "UA.hold.disputed": {
+   "source": "UA",
+   "section_locator": "Holds, Limitations, and Reserves > Holds based on disputed transactions",
+   "passage_sha256": "db13e786a14c76c3baf5591622d7c570ea75e64af352990339bfa2490492b919"
+  },
+  "UA.hold.max": {
+   "source": "UA",
+   "section_locator": "Holds, Limitations, and Reserves > Holds based on disputed transactions",
+   "passage_sha256": "04e9d95c718bad010b2cc610b9e0ec09a2b61eabf3040aecd35cf88b54e5287f"
+  },
+  "UA.snad.forfeit": {
+   "source": "UA",
+   "section_locator": "Impact of various purchase protection processes on sellers",
+   "passage_sha256": "00f34eaf5e41952d95f1d11c4210195c938eb7ee46a5ef8dddd835a7e05b4124"
+  },
+  "UA.snad.fees": {
+   "source": "UA",
+   "section_locator": "Impact of various purchase protection processes on sellers",
+   "passage_sha256": "1693b5a9885a608384696e3b7b125d32e44daa0c9742e978d7a68aa8b3116da7"
+  },
+  "UA.snad.return": {
+   "source": "UA",
+   "section_locator": "Impact of various purchase protection processes on sellers",
+   "passage_sha256": "2c70285c48b14ad829c9d50b0703360ba4dd45eedc7fb283b294265c80d06a6a"
+  },
+  "UA.dispute_fee.applies": {
+   "source": "UA",
+   "section_locator": "Refunds, Reversals and Chargebacks > Dispute fees",
+   "passage_sha256": "68ad9cfc501af4483a441c803ff1b5ac6cb6c036468f6131a1e0a5022bb31961"
+  },
+  "UA.dispute_fee.sp_exempt": {
+   "source": "UA",
+   "section_locator": "Refunds, Reversals and Chargebacks > Dispute fees",
+   "passage_sha256": "fbda48a9469783fac70ac2b9f0522d6833f8aac6e6dad8221d9f2301306ef590"
+  },
+  "UA.sp_suspension": {
+   "source": "UA",
+   "section_locator": "Restricted Activities... > Actions We May Take",
+   "passage_sha256": "d72a519597e9912ec524e0f323a0614bcfe8cbdd6e27a765d985586610b8f192"
+  },
+  "UA.unauth.definition": {
+   "source": "UA",
+   "section_locator": "Liability for Unauthorized Transactions and Other Errors > What is an Unauthorized Transaction",
+   "passage_sha256": "04bcf107832193aaafdee577f2c27b254e0268656a4f8ac50e93f0e673b10989"
+  },
+  "UA.payment_review": {
+   "source": "UA",
+   "section_locator": "Selling and Accepting Payments > Payment review",
+   "passage_sha256": "cd4d1c3c939726f53a6f1e2bed27e491fcdd9134e48a78fb7d35d00d62234953"
+  },
+  "SP.proof.tracking": {
+   "source": "SP",
+   "section_locator": "Establishing Proof of Shipment or Proof of Delivery",
+   "passage_sha256": "52d798cf4aba4b812c21af97c63b5e8ce8488100c817642a38ab9d5d6b10f6d8"
+  },
+  "SP.proof.address_min": {
+   "source": "SP",
+   "section_locator": "Establishing Proof of Shipment or Proof of Delivery",
+   "passage_sha256": "a8a6b1451f2abbedbdf527253e3e40d4f719ca7770a469abcc417b4ffd55b9be"
+  },
+  "API.sp.status_desc": {
+   "source": "API_SELLER_PROTECTION",
+   "section_locator": "status field description",
+   "passage_sha256": "fcbd193360c97c527e8016b9457b2e9f0af44cc17a97498b1a04c76b51d05982"
+  },
+  "API.sp.dispute_categories_desc": {
+   "source": "API_SELLER_PROTECTION",
+   "section_locator": "dispute_categories field description",
+   "passage_sha256": "2abdb8e8823083f68130cb69e39ac0a9cd1e2c0c7b9df350e1dfa1aa35c6e78b"
+  },
+  "API.orders.dispute_category_values": {
+   "source": "API_ORDERS_SP_DEF",
+   "section_locator": "dispute_categories item enum",
+   "passage_sha256": "1f210ae5ed26f865e5215743ed20f795247a9acfdaeeb2c0e487714a403fa4d1"
+  },
+  "API.sp.status_values": {
+   "source": "API_SELLER_PROTECTION",
+   "section_locator": "status enum",
+   "passage_sha256": "4e85bbf1da2f89adcd30028cf6be3990749b4836881530494519f626d1dfff0a"
+  }
+ }
+}
