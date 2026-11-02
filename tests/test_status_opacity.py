@@ -31,7 +31,7 @@ class StatusIsOpaque(unittest.TestCase):
     def test_every_token_produces_the_identical_assessment(self):
         base = self.normalised(self.TOKENS[0])
         for t in self.TOKENS[1:]:
-            self.assertEqual(self.normalised(t), base, t)     
+            self.assertEqual(self.normalised(t), base, t)      
 
     def test_no_token_satisfies_or_fails_the_policy_condition(self):
         for t in self.TOKENS:
@@ -53,7 +53,7 @@ class StatusIsOpaque(unittest.TestCase):
             registry_with_condition(lambda c: c["mapping"].update(satisfied_values=["PARTIALLY_ELIGIBLE"]))
         with self.assertRaises(RegistryError):
             registry_with_condition(lambda c: c["mapping"].update(unsatisfied_values=["NOT_ELIGIBLE"]))
-        with self.assertRaises(RegistryError):                  
+        with self.assertRaises(RegistryError):                     
             registry_with_condition(lambda c: c["mapping"].update(established=True, satisfied_values=["ELIGIBLE"]))
         with self.assertRaises(RegistryError):
             registry_with_condition(lambda c: c.update(status_semantics="ESTABLISHED"))
