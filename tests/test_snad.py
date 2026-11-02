@@ -7,7 +7,7 @@ class SNAD(unittest.TestCase):
         a = assess(REG, S.snad_case())
         self.assertEqual(a.protection_assessment, PA.NOT_COVERED)
         self.assertEqual(a.reason_codes, ("CATEGORY_EXCLUDED",))
-        self.assertEqual(a.checks, ())                               
+        self.assertEqual(a.checks, ())                                
         x = a.exposure
         self.assertEqual(x["exposure_floor"], "480.00")
         self.assertEqual(x["known_lower_bound"], "480.00")
@@ -21,7 +21,7 @@ class SNAD(unittest.TestCase):
         x = a.exposure
         rs = next(c for c in x["documented_additional_costs"] if c["cost_id"] == "return_shipping")
         self.assertEqual((rs["amount"], rs["amount_status"]), ("25.00", "PROVIDED"))
-        self.assertEqual(x["known_lower_bound"], "505.00")           
+        self.assertEqual(x["known_lower_bound"], "505.00")             # floor + additive known cost
         self.assertEqual(x["total_exposure"], "UNBOUNDED_BY_CURRENT_MODEL")
         self.assertNotIn("return_shipping", [u["cost_id"] for u in x["unknown_additional_costs"]])
         self.assertIn("UA.snad.return", rs["passage_ids"])

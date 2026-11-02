@@ -12,7 +12,7 @@ class Unauthorized(unittest.TestCase):
         a = assess(REG, S.unauth_case(status="ELIGIBLE"))
         self.assertEqual(a.evidence_fields_assessment, EFA.REQUIREMENT_FIELDS_DEMONSTRATED)
         self.assertEqual(a.blocking(), [])
-        self.assertEqual(a.protection_assessment, PA.UNKNOWN)                 
+        self.assertEqual(a.protection_assessment, PA.UNKNOWN)                  # not a pass
         self.assertEqual(a.reason_codes, ("POLICY_STATUS_MAPPING_UNKNOWN",))
         c = a.condition(CONDITION)
         self.assertEqual((c["observation"], c["observed_value"]), ("PAYPAL_STATUS_OBSERVED", "ELIGIBLE"))
@@ -35,7 +35,7 @@ class Unauthorized(unittest.TestCase):
 
     def test_11_not_eligible_is_also_opaque(self):
         a = assess(REG, S.unauth_case(status="NOT_ELIGIBLE"))
-        self.assertEqual(a.protection_assessment, PA.UNKNOWN)              
+        self.assertEqual(a.protection_assessment, PA.UNKNOWN)            
         self.assertEqual(a.reason_codes, ("POLICY_STATUS_MAPPING_UNKNOWN",))
         self.assertEqual(a.condition(CONDITION)["observed_value"], "NOT_ELIGIBLE")
 
@@ -68,7 +68,7 @@ class Unauthorized(unittest.TestCase):
         item = next(o for o in a.open_items if o["open_id"] == "unauth.timing_requirement")
         self.assertIn("No comparison is made", item["detail"])
         self.assertIn("SP.unauth.two_days", item["passage_ids"])
-        b = assess(REG, with_ts("2026-01-01T00:00:00Z", "2026-12-31T23:59:59Z"))    
+        b = assess(REG, with_ts("2026-01-01T00:00:00Z", "2026-12-31T23:59:59Z"))     # no timer: result is time-independent
         self.assertEqual(b.timing_requirement, "UNKNOWN_CLOCK")
         self.assertEqual((a.protection_assessment, a.open_items, a.explanation), (b.protection_assessment, b.open_items, b.explanation))
 

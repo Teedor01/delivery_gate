@@ -20,11 +20,11 @@ class UnknownNeverBecomesPass(unittest.TestCase):
     def test_missing_funding_source_is_explicit_and_not_defaulted(self):
         a = assess(REG, S.inr_case(route="CARD_ISSUER_CHARGEBACK", funding=None))
         self.assertEqual(a.observed_inputs["funding_source"], {"state": "NOT_SUPPLIED", "value": None})
-        self.assertEqual(a.protection_assessment, PA.NOT_COVERED)             # excluded route; funding stays visibly unknown
+        self.assertEqual(a.protection_assessment, PA.NOT_COVERED)         
         oi = next(o for o in a.open_items if o["open_id"].endswith("funding_source_not_supplied"))
         self.assertEqual(oi["state"], "UNKNOWN")
         self.assertIn("inference", oi["detail"])
-        b = assess(REG, S.inr_case(funding=None))                        
+        b = assess(REG, S.inr_case(funding=None))                           
         self.assertEqual(b.observed_inputs["funding_source"]["state"], "NOT_SUPPLIED")
         self.assertNotEqual(b.observed_inputs["funding_source"]["value"], "CARD")
 
