@@ -1,0 +1,80 @@
+{
+  "artifact_id": "A05",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "carrier_name",
+      "value": "FedEx",
+      "normalized_value": "FedEx",
+      "source_span": "FedEx 774912340003",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A05"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "tracking_number",
+      "value": "774912340003",
+      "normalized_value": "774912340003",
+      "source_span": "FedEx 774912340003",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A05"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_status",
+      "value": "delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "delivered to 1 Market Street on Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A05"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_date",
+      "value": "Oct 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "on Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A05"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "recipient_address",
+      "value": "1 Market Street",
+      "normalized_value": {
+        "line1": "1 Market Street"
+      },
+      "source_span": "delivered to 1 Market Street",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A05"
+    }
+  ],
+  "extraction_notes": [
+    "A second address in the artifact is described as a billing address; the vocabulary has no billing-address fact, so it was not extracted."
+  ]
+}

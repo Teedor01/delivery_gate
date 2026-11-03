@@ -1,0 +1,166 @@
+{
+  "counts": {
+    "gold": 67,
+    "matched": 67,
+    "accepted": 67,
+    "matched_acc": 67,
+    "span_ok": 67,
+    "norm_tot": 67,
+    "norm_ok": 67,
+    "attr_tot": 67,
+    "attr_ok": 67,
+    "mod_ok": 67,
+    "amb_tot": 7,
+    "amb_ok": 7,
+    "raw": 67,
+    "halluc": 0,
+    "rejected": 0,
+    "must_not": 0,
+    "unsupported": 0
+  },
+  "metrics": {
+    "fact_recall": 1.0,
+    "fact_precision": 1.0,
+    "source_span_correctness": 1.0,
+    "normalization_correctness": 1.0,
+    "attribution_correctness": 1.0,
+    "modality_correctness": 1.0,
+    "ambiguity_preservation": 1.0,
+    "contradiction_preservation": 1.0,
+    "spurious_contradictions": 0,
+    "must_not_extract_violations": 0,
+    "hallucination_rate": 0.0,
+    "unsupported_field_rate": 0.0
+  },
+  "thresholds": {
+    "fact_recall": ">= 0.95",
+    "fact_precision": ">= 0.95",
+    "source_span_correctness": ">= 0.95",
+    "normalization_correctness": ">= 1.0",
+    "attribution_correctness": ">= 0.95",
+    "modality_correctness": ">= 0.95",
+    "ambiguity_preservation": ">= 1.0",
+    "contradiction_preservation": ">= 1.0",
+    "spurious_contradictions": "<= 0",
+    "must_not_extract_violations": "<= 0",
+    "hallucination_rate": "<= 0.0",
+    "unsupported_field_rate": "<= 0.05"
+  },
+  "pass": {
+    "fact_recall": true,
+    "fact_precision": true,
+    "source_span_correctness": true,
+    "normalization_correctness": true,
+    "attribution_correctness": true,
+    "modality_correctness": true,
+    "ambiguity_preservation": true,
+    "contradiction_preservation": true,
+    "spurious_contradictions": true,
+    "must_not_extract_violations": true,
+    "hallucination_rate": true,
+    "unsupported_field_rate": true
+  },
+  "all_pass": true,
+  "per_artifact": {
+    "A01": {
+      "gold": 7,
+      "accepted": 7,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A02": {
+      "gold": 5,
+      "accepted": 5,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A03": {
+      "gold": 5,
+      "accepted": 5,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A04": {
+      "gold": 6,
+      "accepted": 6,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A05": {
+      "gold": 5,
+      "accepted": 5,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A06": {
+      "gold": 3,
+      "accepted": 3,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A07": {
+      "gold": 8,
+      "accepted": 8,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A08": {
+      "gold": 4,
+      "accepted": 4,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A09": {
+      "gold": 3,
+      "accepted": 3,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A10": {
+      "gold": 0,
+      "accepted": 0,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A11": {
+      "gold": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A12": {
+      "gold": 10,
+      "accepted": 10,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A13": {
+      "gold": 4,
+      "accepted": 4,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A14": {
+      "gold": 3,
+      "accepted": 3,
+      "rejected": 0,
+      "must_not_violations": []
+    },
+    "A15": {
+      "gold": 3,
+      "accepted": 3,
+      "rejected": 0,
+      "must_not_violations": []
+    }
+  },
+  "extractor_kinds": [
+    "RECORDED_ASSISTANT_OUTPUT"
+  ],
+  "adversarial_artifacts": [
+    "A11",
+    "A13",
+    "A14",
+    "A15"
+  ],
+  "artifact_count": 15
+}

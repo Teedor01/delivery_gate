@@ -1,0 +1,83 @@
+{
+  "artifact_id": "A02",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456784",
+      "normalized_value": "1Z999AA10123456784",
+      "source_span": "pkg 1Z999AA10123456784",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A02"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "carrier_name",
+      "value": "ups",
+      "normalized_value": "UPS",
+      "source_span": "ups  quantum view notif",
+      "confidence": "MEDIUM",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A02"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_status",
+      "value": "DELIVERED",
+      "normalized_value": "DELIVERED",
+      "source_span": "-- DELIVERED --",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A02"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_date",
+      "value": "10/20/2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "10/20/2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A02"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "recipient_address",
+      "value": "1 MARKET ST  SAN FRANCISCO CA 94105-1234",
+      "normalized_value": {
+        "line1": "1 MARKET ST",
+        "city": "SAN FRANCISCO",
+        "region": "CA",
+        "postal_code": "94105-1234"
+      },
+      "source_span": "1 MARKET ST  SAN FRANCISCO CA 94105-1234",
+      "confidence": "MEDIUM",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A02"
+    }
+  ],
+  "extraction_notes": [
+    "Text is irregularly spaced and upper-cased; values were copied as written."
+  ]
+}

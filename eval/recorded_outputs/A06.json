@@ -1,0 +1,55 @@
+{
+  "artifact_id": "A06",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "delivery_status",
+      "value": "has been delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "Your order has been delivered",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A06"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "delivery_date",
+      "value": "Oct 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "Delivered Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A06"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "recipient_address",
+      "value": "1 Market St, San Francisco, CA 94105",
+      "normalized_value": {
+        "line1": "1 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "postal_code": "94105"
+      },
+      "source_span": "1 Market St, San Francisco, CA 94105",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A06"
+    }
+  ],
+  "extraction_notes": [
+    "The artifact contains no tracking number; none was output."
+  ]
+}

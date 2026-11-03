@@ -1,0 +1,8 @@
+{
+  "produced_by": "the assistant (Claude) in the build conversation, following delivery_extraction/prompt.py; transcribed by eval/author_recorded_outputs.py",
+  "automated_api_call": false,
+  "independence_warning": "The same assistant wrote eval/corpus.py gold labels; metrics computed from these files are NOT an independent measure of model accuracy.",
+  "prompt_sha256": "723f596aba406b9748d1af39e8c869df528f22a82782c164a4c95eb2d2ac2a14",
+  "recorded_on": "2026-10-29",
+  "artifacts": 15
+}

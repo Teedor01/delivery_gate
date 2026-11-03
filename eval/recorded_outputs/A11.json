@@ -1,0 +1,22 @@
+{
+  "artifact_id": "A11",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "delivery_status",
+      "value": "probably delivered",
+      "normalized_value": "UNKNOWN",
+      "source_span": "Looks like it was probably delivered",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Hedged: 'looks like' and 'probably'; the artifact does not state that delivery occurred.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "HEDGED",
+      "entity_ref": null,
+      "artifact_id": "A11"
+    }
+  ],
+  "extraction_notes": [
+    "Other sentences in the artifact are opinions about an outcome, not shipment facts, and were not extracted."
+  ]
+}
