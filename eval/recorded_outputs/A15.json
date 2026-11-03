@@ -1,0 +1,48 @@
+{
+  "artifact_id": "A15",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456790",
+      "normalized_value": "UNKNOWN",
+      "source_span": "I think the tracking number is 1Z999AA10123456790 but I'm not sure",
+      "confidence": "MEDIUM",
+      "ambiguity": true,
+      "ambiguity_note": "The writer is not sure of the number; the raw value is kept but not normalized.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "HEDGED",
+      "entity_ref": null,
+      "artifact_id": "A15"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "delivery_status",
+      "value": "got there",
+      "normalized_value": "UNKNOWN",
+      "source_span": "It got there around the 20th I guess",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Hedged and does not state a delivery status.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "HEDGED",
+      "entity_ref": null,
+      "artifact_id": "A15"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_date",
+      "value": "around the 20th",
+      "normalized_value": "UNKNOWN",
+      "source_span": "around the 20th I guess",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Approximate day only; no month or year.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "HEDGED",
+      "entity_ref": null,
+      "artifact_id": "A15"
+    }
+  ],
+  "extraction_notes": []
+}

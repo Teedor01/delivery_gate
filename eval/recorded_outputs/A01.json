@@ -1,0 +1,110 @@
+{
+  "artifact_id": "A01",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "tracking_number",
+      "value": "774912340001",
+      "normalized_value": "774912340001",
+      "source_span": "Tracking number: 774912340001",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "carrier_name",
+      "value": "FedEx",
+      "normalized_value": "FedEx",
+      "source_span": "FedEx Delivery Manager",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_status",
+      "value": "was delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "Your package was delivered",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_date",
+      "value": "Tuesday, October 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "Delivered: Tuesday, October 20, 2026 at 2:32 PM",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "delivery_time",
+      "value": "2:32 PM",
+      "normalized_value": "14:32",
+      "source_span": "Delivered: Tuesday, October 20, 2026 at 2:32 PM",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f6",
+      "fact": "recipient_address",
+      "value": "1 Market St, San Francisco, CA 94105, US",
+      "normalized_value": {
+        "line1": "1 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "postal_code": "94105",
+        "country": "US"
+      },
+      "source_span": "Delivered to: 1 Market St, San Francisco, CA 94105, US",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    },
+    {
+      "fact_id": "f7",
+      "fact": "signature_present",
+      "value": "Signed for by: A. SMITH",
+      "normalized_value": true,
+      "source_span": "Signed for by: A. SMITH",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CARRIER_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A01"
+    }
+  ],
+  "extraction_notes": []
+}

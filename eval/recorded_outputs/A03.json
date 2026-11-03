@@ -1,0 +1,81 @@
+{
+  "artifact_id": "A03",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456785",
+      "normalized_value": "1Z999AA10123456785",
+      "source_span": "Tracking ID: 1Z999AA10123456785",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A03"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "delivery_status",
+      "value": "Delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "Status: Delivered",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A03"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_date",
+      "value": "Oct 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "Delivery date: Oct 20, 2026 2:32 PM",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A03"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_time",
+      "value": "2:32 PM",
+      "normalized_value": "14:32",
+      "source_span": "Delivery date: Oct 20, 2026 2:32 PM",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A03"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "recipient_address",
+      "value": "1 Market St, San Francisco",
+      "normalized_value": {
+        "line1": "1 Market St",
+        "city": "San Francisco"
+      },
+      "source_span": "Delivered to 1 Market St, San Francisco",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A03"
+    }
+  ],
+  "extraction_notes": [
+    "No sender or carrier is named in the artifact, so attribution is UNKNOWN and no carrier_name is output."
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "artifact_id": "A13",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "redirect_reported",
+      "value": "it wasn't redirected",
+      "normalized_value": false,
+      "source_span": "The customer says it wasn't redirected",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "CUSTOMER_STATEMENT_RELAYED",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A13"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "delivery_status",
+      "value": "delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "Carrier tracking shows delivered Oct 20, 2026 to 1 Market St, San Francisco, CA 94105",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A13"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_date",
+      "value": "Oct 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "delivered Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A13"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "recipient_address",
+      "value": "1 Market St, San Francisco, CA 94105",
+      "normalized_value": {
+        "line1": "1 Market St",
+        "city": "San Francisco",
+        "region": "CA",
+        "postal_code": "94105"
+      },
+      "source_span": "1 Market St, San Francisco, CA 94105",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A13"
+    }
+  ],
+  "extraction_notes": [
+    "The redirect statement is a customer's claim relayed by the writer, not a carrier statement."
+  ]
+}

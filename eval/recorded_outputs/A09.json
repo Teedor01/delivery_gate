@@ -1,0 +1,53 @@
+{
+  "artifact_id": "A09",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456787",
+      "normalized_value": "1Z999AA10123456787",
+      "source_span": "shipment 1Z999AA10123456787",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A09"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "redirect_reported",
+      "value": "was redirected",
+      "normalized_value": true,
+      "source_span": "was redirected to 22 Broad Street, New York, NY 10004 by the recipient on Oct 21, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A09"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "recipient_address",
+      "value": "22 Broad Street, New York, NY 10004",
+      "normalized_value": {
+        "line1": "22 Broad Street",
+        "city": "New York",
+        "region": "NY",
+        "postal_code": "10004"
+      },
+      "source_span": "22 Broad Street, New York, NY 10004",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": "Address the shipment was redirected to.",
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A09"
+    }
+  ],
+  "extraction_notes": []
+}

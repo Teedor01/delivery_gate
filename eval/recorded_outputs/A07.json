@@ -1,0 +1,122 @@
+{
+  "artifact_id": "A07",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "carrier_name",
+      "value": "FedEx",
+      "normalized_value": "FedEx",
+      "source_span": "FedEx tracking",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "tracking_number",
+      "value": "774912340002",
+      "normalized_value": "774912340002",
+      "source_span": "tracking 774912340002",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_status",
+      "value": "delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "says delivered Tuesday at 14:32 to 1 Market Street",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_date",
+      "value": "Tuesday",
+      "normalized_value": "UNKNOWN",
+      "source_span": "delivered Tuesday at 14:32",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Weekday only; the artifact gives no calendar date.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "delivery_time",
+      "value": "14:32",
+      "normalized_value": "14:32",
+      "source_span": "Tuesday at 14:32",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f6",
+      "fact": "recipient_address",
+      "value": "1 Market Street",
+      "normalized_value": {
+        "line1": "1 Market Street"
+      },
+      "source_span": "to 1 Market Street",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f7",
+      "fact": "signature_present",
+      "value": "Nobody signed for it",
+      "normalized_value": false,
+      "source_span": "Nobody signed for it",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    },
+    {
+      "fact_id": "f8",
+      "fact": "intended_ship_to_address",
+      "value": "1 Market St",
+      "normalized_value": {
+        "line1": "1 Market St"
+      },
+      "source_span": "The order was supposed to go to 1 Market St",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A07"
+    }
+  ],
+  "extraction_notes": []
+}

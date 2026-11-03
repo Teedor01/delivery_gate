@@ -1,0 +1,153 @@
+{
+  "artifact_id": "A12",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "order_reference",
+      "value": "A-2001",
+      "normalized_value": "A-2001",
+      "source_span": "Order A-2001",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "carrier_name",
+      "value": "UPS",
+      "normalized_value": "UPS",
+      "source_span": "Order A-2001: UPS",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456788",
+      "normalized_value": "1Z999AA10123456788",
+      "source_span": "UPS 1Z999AA10123456788",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "delivery_status",
+      "value": "delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "delivered Oct 19, 2026 to 5 Pine St, Portland, OR 97204",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "delivery_date",
+      "value": "Oct 19, 2026",
+      "normalized_value": "2026-10-19",
+      "source_span": "delivered Oct 19, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f6",
+      "fact": "recipient_address",
+      "value": "5 Pine St, Portland, OR 97204",
+      "normalized_value": {
+        "line1": "5 Pine St",
+        "city": "Portland",
+        "region": "OR",
+        "postal_code": "97204"
+      },
+      "source_span": "5 Pine St, Portland, OR 97204",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2001",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f7",
+      "fact": "order_reference",
+      "value": "A-2002",
+      "normalized_value": "A-2002",
+      "source_span": "Order A-2002",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2002",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f8",
+      "fact": "carrier_name",
+      "value": "UPS",
+      "normalized_value": "UPS",
+      "source_span": "Order A-2002: UPS",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2002",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f9",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456789",
+      "normalized_value": "1Z999AA10123456789",
+      "source_span": "UPS 1Z999AA10123456789",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2002",
+      "artifact_id": "A12"
+    },
+    {
+      "fact_id": "f10",
+      "fact": "delivery_status",
+      "value": "still in transit",
+      "normalized_value": "IN_TRANSIT",
+      "source_span": "is still in transit",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": "A-2002",
+      "artifact_id": "A12"
+    }
+  ],
+  "extraction_notes": [
+    "The artifact describes two orders; facts carry entity_ref."
+  ]
+}

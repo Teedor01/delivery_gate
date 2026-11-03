@@ -1,0 +1,90 @@
+{
+  "artifact_id": "A04",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "order_reference",
+      "value": "#A-1042",
+      "normalized_value": "A-1042",
+      "source_span": "order #A-1042",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "shipment_date",
+      "value": "Oct 15",
+      "normalized_value": "UNKNOWN",
+      "source_span": "shipped order #A-1042 on Oct 15",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Month and day only; the artifact gives no year.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "carrier_name",
+      "value": "UPS",
+      "normalized_value": "UPS",
+      "source_span": "via UPS",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456786",
+      "normalized_value": "1Z999AA10123456786",
+      "source_span": "tracking 1Z999AA10123456786",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    },
+    {
+      "fact_id": "f5",
+      "fact": "delivery_status",
+      "value": "was delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "The tracking page shows it was delivered Oct 19",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    },
+    {
+      "fact_id": "f6",
+      "fact": "delivery_date",
+      "value": "Oct 19",
+      "normalized_value": "UNKNOWN",
+      "source_span": "it was delivered Oct 19",
+      "confidence": "HIGH",
+      "ambiguity": true,
+      "ambiguity_note": "Month and day only; the artifact gives no year.",
+      "attribution": "MERCHANT_STATEMENT",
+      "modality": "REPORTED",
+      "entity_ref": null,
+      "artifact_id": "A04"
+    }
+  ],
+  "extraction_notes": []
+}

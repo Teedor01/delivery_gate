@@ -1,0 +1,67 @@
+{
+  "artifact_id": "A08",
+  "facts": [
+    {
+      "fact_id": "f1",
+      "fact": "delivery_status",
+      "value": "Delivered",
+      "normalized_value": "DELIVERED",
+      "source_span": "Delivered to 1 Market Street, San Francisco, CA 94105 on Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A08"
+    },
+    {
+      "fact_id": "f2",
+      "fact": "recipient_address",
+      "value": "1 Market Street, San Francisco, CA 94105",
+      "normalized_value": {
+        "line1": "1 Market Street",
+        "city": "San Francisco",
+        "region": "CA",
+        "postal_code": "94105"
+      },
+      "source_span": "1 Market Street, San Francisco, CA 94105",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A08"
+    },
+    {
+      "fact_id": "f3",
+      "fact": "delivery_date",
+      "value": "Oct 20, 2026",
+      "normalized_value": "2026-10-20",
+      "source_span": "CA 94105 on Oct 20, 2026",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A08"
+    },
+    {
+      "fact_id": "f4",
+      "fact": "tracking_number",
+      "value": "1Z999AA10123456787",
+      "normalized_value": "1Z999AA10123456787",
+      "source_span": "Tracking 1Z999AA10123456787",
+      "confidence": "HIGH",
+      "ambiguity": false,
+      "ambiguity_note": null,
+      "attribution": "UNKNOWN",
+      "modality": "DIRECT",
+      "entity_ref": null,
+      "artifact_id": "A08"
+    }
+  ],
+  "extraction_notes": []
+}
