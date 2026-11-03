@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from delivery_gate.engine import Assessment, assess
-from delivery_gate.models import Case, EvidenceFact, Provenance, ProvStatus, SourceType
+from delivery_gate.models import Case, EvidenceFact, Provenance, ProvStatus, SourceAuthenticity, SourceType
 from delivery_gate.registry import PolicyRegistry
 from delivery_extraction.review import Attestation, ReviewAction, ReviewDecision, ReviewError
 from delivery_extraction.schema import FACT_VOCAB, UNKNOWN, Artifact, CandidateFact
@@ -22,7 +22,7 @@ class BridgeResult:
     entity_ref: Optional[str]
     bridged: List[Dict[str, Any]] = field(default_factory=list)
     not_bridged: List[Dict[str, Any]] = field(default_factory=list)
-    evidence_index: Dict[str, List[str]] = field(default_factory=dict)     # engine evidence name -> candidate fact ids
+    evidence_index: Dict[str, List[str]] = field(default_factory=dict)    
 
     def to_dict(self) -> Dict[str, Any]:
         return {"entity_ref": self.entity_ref, "bridged": self.bridged, "not_bridged": self.not_bridged,
@@ -32,9 +32,11 @@ class BridgeResult:
 def _provenance(f: CandidateFact, decision: Optional[ReviewDecision], artifact: Artifact,
                 attested: set) -> Provenance:
     if decision is None:
-        return Provenance(SourceType.EXTRACTED_FROM_TEXT, f.fact_id, ProvStatus.EXTRACTED_UNREVIEWED, None, None, f.source_span)
+        return Provenance(SourceType.EXTRACTED_FROM_TEXT, f.fact_id, ProvStatus.EXTRACTED_UNREVIEWED, None, None, f.source_span,
+                          SourceAuthenticity.UNVERIFIED)
     if decision.action == ReviewAction.APPROVE_AS_MERCHANT_ASSERTION:
-        return Provenance(SourceType.MERCHANT_STATEMENT, f.fact_id, ProvStatus.MERCHANT_ASSERTED, None, None, f.source_span)
+        return Provenance(SourceType.MERCHANT_STATEMENT, f.fact_id, ProvStatus.MERCHANT_ASSERTED, None, None, f.source_span,
+                          SourceAuthenticity.UNVERIFIED)
     if decision.action == ReviewAction.APPROVE_AS_CARRIER_DOCUMENT:
         if artifact.artifact_id not in attested:
             raise ReviewError(f"{f.fact_id}: carrier-document approval needs a reviewer attestation for artifact {artifact.artifact_id}")
@@ -42,7 +44,8 @@ def _provenance(f: CandidateFact, decision: Optional[ReviewDecision], artifact: 
             raise ReviewError(f"{f.fact_id}: artifact kind {artifact.declared_kind} cannot be a carrier document")
         if f.attribution not in ("CARRIER_STATEMENT", "UNKNOWN") or f.modality != "DIRECT":
             raise ReviewError(f"{f.fact_id}: a {f.attribution}/{f.modality} statement can never be promoted to a carrier document")
-        return Provenance(SourceType.CARRIER_DOCUMENT, f.fact_id, ProvStatus.HUMAN_CONFIRMED, None, None, f.source_span)
+        return Provenance(SourceType.CARRIER_DOCUMENT, f.fact_id, ProvStatus.HUMAN_CONFIRMED, None, None, f.source_span,
+                          SourceAuthenticity.REVIEWED)
     raise ReviewError(f"unsupported review action {decision.action}")
 
 
@@ -77,14 +80,16 @@ def build_case(base_case: Case, candidates: Sequence[CandidateFact], artifacts: 
             carrier_artifacts.add(c.artifact_id)
         res.bridged.append({**row, "engine_evidence": spec["engine"], "engine_value": ev.value,
                             "source_type": prov.source_type.value, "provenance_status": prov.status.value,
+                            "source_authenticity": prov.source_authenticity.value if prov.source_authenticity else None,
                             "source_ref": prov.source_ref, "reviewed": d is not None})
         res.evidence_index.setdefault(spec["engine"], []).append(c.fact_id)
-    for aid in sorted(carrier_artifacts):                      # the reviewer attested these artifacts as carrier documents
-        ev = EvidenceFact("delivery_record", True, Provenance(SourceType.CARRIER_DOCUMENT, f"{aid}#attestation", ProvStatus.HUMAN_CONFIRMED))
+    for aid in sorted(carrier_artifacts):                   
+        ev = EvidenceFact("delivery_record", True, Provenance(SourceType.CARRIER_DOCUMENT, f"{aid}#attestation", ProvStatus.HUMAN_CONFIRMED, None, None, None, SourceAuthenticity.REVIEWED))
         items.append(ev)
         res.bridged.append({"fact_id": f"{aid}#attestation", "fact": "reviewer_attestation", "artifact_id": aid,
                             "engine_evidence": "delivery_record", "engine_value": True, "source_type": "CARRIER_DOCUMENT",
-                            "provenance_status": "HUMAN_CONFIRMED", "source_ref": f"{aid}#attestation", "reviewed": True})
+                            "provenance_status": "HUMAN_CONFIRMED", "source_authenticity": "REVIEWED",
+                            "source_ref": f"{aid}#attestation", "reviewed": True})
         res.evidence_index.setdefault("delivery_record", []).append(f"{aid}#attestation")
     res.case = Case(base_case.case_id, base_case.transaction_facts, base_case.evidence + tuple(items))
     return res

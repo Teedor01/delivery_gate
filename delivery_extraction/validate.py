@@ -96,7 +96,7 @@ def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str]) -> None:
     if nv == UNKNOWN:
         if f["ambiguity"] is not True:
             reasons.append("UNKNOWN_WITHOUT_AMBIGUITY")
-        return                                  
+        return                                           
     if value == UNKNOWN:
         reasons.append("VALUE_UNKNOWN_BUT_NORMALIZED_SET")
     elif norm_text(value) not in norm_text(span):
@@ -134,7 +134,7 @@ def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str]) -> None:
         if nv is True and (neg.search(span) or not pos.search(span)):
             reasons.append("UNGROUNDED_BOOLEAN")
         if nv is False and not neg.search(span):
-            reasons.append("UNGROUNDED_BOOLEAN")      
+            reasons.append("UNGROUNDED_BOOLEAN")        
     elif typ == "address":
         if not isinstance(nv, dict) or not nv or not set(nv) <= set(ADDRESS_FIELDS) or not all(isinstance(v, str) and v for v in nv.values()):
             reasons.append("BAD_TYPE"); return
@@ -190,7 +190,7 @@ def _validate_fact(f: Any, artifact: Artifact, seen_ids: set) -> Tuple[Optional[
         reasons.append("SPAN_TOO_LONG")
     start = artifact.text.find(span)
     if start < 0:
-        reasons.append("SPAN_NOT_FOUND_IN_ARTIFACT")     
+        reasons.append("SPAN_NOT_FOUND_IN_ARTIFACT")      
     if reasons:
         return None, reasons
     # semantic guards that need a well-formed fact
