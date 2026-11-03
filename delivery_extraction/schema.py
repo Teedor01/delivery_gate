@@ -6,7 +6,6 @@ from typing import Any, Dict, Optional, Tuple
 
 UNKNOWN = "UNKNOWN"
 
-# fact -> type, the Phase 1 evidence name it may feed (or None) and why not.
 FACT_VOCAB: Dict[str, Dict[str, Any]] = {
     "tracking_number": {"type": "string", "engine": "tracking_number"},
     "carrier_name": {"type": "string", "engine": None, "why": "no policy requirement models the carrier name"},
@@ -36,7 +35,7 @@ MAX_SPAN_CHARS = 400
 class Artifact:
     artifact_id: str
     text: str
-    declared_kind: str = "OTHER"     
+    declared_kind: str = "OTHER"    
 
     def __post_init__(self):
         if self.declared_kind not in ARTIFACT_KINDS:

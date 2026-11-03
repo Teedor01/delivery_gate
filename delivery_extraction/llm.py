@@ -1,3 +1,6 @@
+"""Live LLM adapter (Anthropic Messages API). Isolated on purpose: this module never imports the policy engine, so the
+model call path cannot see rules, passages or assessments. Not exercised against the real API in the build environment (no
+network, no key); the request/response handling is tested through an injected transport."""
 from __future__ import annotations
 
 import hashlib
@@ -15,7 +18,7 @@ API_VERSION = "2023-06-01"
 Transport = Callable[[str, dict, bytes], Tuple[int, bytes]]
 
 
-def _urllib_transport(url: str, headers: dict, body: bytes) -> Tuple[int, bytes]:  
+def _urllib_transport(url: str, headers: dict, body: bytes) -> Tuple[int, bytes]:   
     req = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
