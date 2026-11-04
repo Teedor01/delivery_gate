@@ -89,6 +89,20 @@ class ProvStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class SourceAuthenticity(str, Enum):
+    """Whether the SOURCE ARTIFACT is genuine, kept apart from who a statement is attributed to (content attribution).
+    A fact attributed to a carrier inside an artifact is not thereby authentic: attribution is a claim about content,
+    authenticity is a claim about the artifact.
+
+      UNVERIFIED  nobody has established that the artifact is genuine (the default for anything extracted or asserted)
+      REVIEWED    a human reviewer attested the artifact itself is genuine (not merely that the extracted text is right)
+      VERIFIED    an independent corroboration source established it (e.g. a carrier API) - never granted by a reviewer
+    """
+    UNVERIFIED = "UNVERIFIED"
+    REVIEWED = "REVIEWED"
+    VERIFIED = "VERIFIED"
+
+
 # ---- names -------------------------------------------------------------------------------------
 TRANSACTION_FACT_NAMES = frozenset({
     "merchant_account_country", "claim_category", "route", "funding_source",
@@ -147,7 +161,7 @@ def _validate_value(name: str, value: Any) -> Any:
             raise ValueError(f"{name} must not be negative")
         return str(d)
     if name in DATE_NAMES:
-        date.fromisoformat(str(value))  
+        date.fromisoformat(str(value))
         return str(value)
     if name in ADDRESS_NAMES:
         if not isinstance(value, dict) or not set(value) <= set(ADDRESS_KEYS):
@@ -174,20 +188,31 @@ class Provenance:
     source_type: SourceType
     source_ref: str
     status: ProvStatus
-    confidence: Optional[float] = None  
+    confidence: Optional[float] = None   
     timestamp: Optional[str] = None
     text_span: Optional[str] = None
+    source_authenticity: Optional[SourceAuthenticity] = None   
 
     def __post_init__(self):
         if not self.source_ref:
             raise ValueError("provenance.source_ref is required")
         if self.source_type == SourceType.EXTRACTED_FROM_TEXT and not self.text_span:
             raise ValueError("text_span is required for EXTRACTED_FROM_TEXT provenance")
+        if self.source_authenticity is not None:
+            object.__setattr__(self, "source_authenticity", SourceAuthenticity(self.source_authenticity))
+            if self.source_authenticity == SourceAuthenticity.VERIFIED and self.source_type != SourceType.CARRIER_API:
+                raise ValueError("VERIFIED authenticity needs an independent corroboration source (CARRIER_API); "
+                                 "a reviewer or a document can never confer it")
+            if self.source_authenticity == SourceAuthenticity.REVIEWED and self.status != ProvStatus.HUMAN_CONFIRMED:
+                raise ValueError("REVIEWED authenticity requires a human-confirmed provenance status")
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"source_type": self.source_type.value, "source_ref": self.source_ref,
-                "status": self.status.value, "confidence": self.confidence,
-                "timestamp": self.timestamp, "text_span": self.text_span}
+        d = {"source_type": self.source_type.value, "source_ref": self.source_ref,
+             "status": self.status.value, "confidence": self.confidence,
+             "timestamp": self.timestamp, "text_span": self.text_span}
+        if self.source_authenticity is not None:         
+            d["source_authenticity"] = self.source_authenticity.value
+        return d
 
 
 @dataclass(frozen=True)
