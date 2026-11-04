@@ -13,7 +13,7 @@ class TransactionDataSource(Protocol):
 
 def _prov(d: Dict[str, Any]) -> Provenance:
     return Provenance(SourceType(d["source_type"]), d["source_ref"], ProvStatus(d["status"]),
-                      d.get("confidence"), d.get("timestamp"), d.get("text_span"))
+                      d.get("confidence"), d.get("timestamp"), d.get("text_span"), d.get("source_authenticity"))
 
 
 def case_from_dict(d: Dict[str, Any]) -> Case:
