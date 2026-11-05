@@ -78,11 +78,11 @@ class ReviewBoundary(unittest.TestCase):
     def test_carrier_approval_requires_attestation_kind_and_attribution(self):
         with self.assertRaises(ReviewError):                                  
             build_case(base_case(), facts_of("A01"), ART, approve("A01", ["f1"]))
-        with self.assertRaises(ReviewError):                                   
+        with self.assertRaises(ReviewError):                                  
             build_case(base_case(), facts_of("A06"), ART, approve("A06", ["f1"]), [Attestation("A06", "r")])
         with self.assertRaises(ReviewError):                                  
             build_case(base_case(), facts_of("A04"), ART, approve("A04", ["f4"]), [Attestation("A04", "r")])
-        with self.assertRaises(ReviewError):                                  
+        with self.assertRaises(ReviewError):                                   
             build_case(base_case(), facts_of("A13"), ART, approve("A13", ["f1"]), [Attestation("A13", "r")])
 
     def test_attribution_and_modality_block_promotion_even_when_the_artifact_kind_is_carrier(self):
@@ -101,11 +101,12 @@ class ReviewBoundary(unittest.TestCase):
         run = run_extraction([a], MappingExtractor({"K1": mk_out(a, facts)}))
         self.assertEqual(len(run.candidates), 3)
         arts, att = run.artifacts, [Attestation("K1", "r")]
-        for fid in ("f1", "f2"):                    
+        for fid in ("f1", "f2"):                       # customer-relayed claim; and a REPORTED statement of unknown attribution
             with self.assertRaises(ReviewError, msg=fid):
                 build_case(base_case(), run.candidates, arts, approve("K1", [fid]), att)
-        ok = build_case(base_case(), run.candidates, arts, approve("K1", ["f3"]), att)  
+        ok = build_case(base_case(), run.candidates, arts, approve("K1", ["f3"]), att)      # the carrier's own direct statement is fine
         self.assertEqual(next(b for b in ok.bridged if b["fact_id"] == "K1#f3")["source_type"], "CARRIER_DOCUMENT")
+        # the relayed claim can still be accepted, but only as an uncorroborated merchant assertion
         mer = build_case(base_case(), run.candidates, arts, approve("K1", ["f1"], MERCH), att)
         self.assertEqual(next(b for b in mer.bridged if b["fact_id"] == "K1#f1")["source_type"], "MERCHANT_STATEMENT")
 
@@ -117,6 +118,7 @@ class ReviewBoundary(unittest.TestCase):
         chk = a.check("inr.no_redirect")
         self.assertEqual((chk.status, chk.corroboration), (ES.DEMONSTRATED, "MERCHANT_ASSERTED_ONLY"))
         self.assertIn("inr.no_redirect", a.uncorroborated_requirements)
+        # and it is not delivery evidence: no carrier record exists, so the record requirement stays unmet
         self.assertEqual(a.check("inr.proof_of_delivery.record").status, ES.NOT_DEMONSTRATED)
         self.assertEqual(a.evidence_fields_assessment, EFA.REQUIREMENT_FIELDS_NOT_DEMONSTRATED)
 
@@ -127,6 +129,7 @@ class ReviewBoundary(unittest.TestCase):
         self.assertEqual(next(n for n in br.not_bridged if n["fact_id"] == "A01#f1")["reason"], "REJECTED_BY_REVIEWER")
 
     def test_the_model_can_never_attest_an_artifact(self):
+        # attestations are reviewer-created objects; nothing in the validated schema can create one
         from delivery_extraction.schema import FACT_VOCAB, FACT_KEYS
         self.assertNotIn("attestation", " ".join(FACT_KEYS + tuple(FACT_VOCAB)).lower())
         self.assertNotIn("delivery_record", FACT_VOCAB)
@@ -185,6 +188,7 @@ class ContradictionsStayExplicit(unittest.TestCase):
         c = cs[0]
         self.assertEqual((c.fact, c.status, c.needs_human_review), ("recipient_address", "CONTRADICTED", True))
         self.assertEqual({v["fact_id"] for v in c.values}, {"A08#f2", "A09#f3"})
+        # both candidate facts survive validation; neither was dropped or merged
         self.assertTrue({"A08#f2", "A09#f3"} <= {f.fact_id for f in recorded_run().candidates})
 
     def test_unreviewed_contradicting_artifacts_need_human_review_in_the_engine(self):
@@ -197,14 +201,16 @@ class ContradictionsStayExplicit(unittest.TestCase):
         _, a = assess_extraction(REG, base_case(), facts_of("A08", "A09"), ART, revs, [Attestation("A08", "r"), Attestation("A09", "r")])
         m = a.check("inr.proof_of_delivery.recipient_address_matches")
         self.assertEqual((m.status, m.reason_code, m.needs_human_review), (ES.CONTRADICTED, "CONFLICTING_EVIDENCE", True))
-        self.assertEqual(a.check("inr.no_redirect").status, ES.CONTRADICTED)    
+        self.assertEqual(a.check("inr.no_redirect").status, ES.CONTRADICTED)         # redirect_reported=True from A09 vs base False
         self.assertEqual(a.protection_assessment, PA.REQUIREMENTS_NOT_DEMONSTRATED)
 
     def test_unrelated_orders_are_never_compared(self):
         from delivery_extraction.contradictions import detect
+        # compared as ONE case, three unrelated shipments look like many contradictions: that is why grouping is mandatory
         self.assertGreater(len(detect(facts_of("A01", "A02", "A05"))), 3)
+        # with the declared case groups only the genuine pair is flagged
         self.assertEqual([c.contradiction_id for c in recorded_run().contradictions], ["CASE-8-9:C1"])
-        self.assertEqual(detect(facts_of("A12")), [])               
+        self.assertEqual(detect(facts_of("A12")), [])                      # two orders inside one artifact stay apart via entity_ref
 
 
 class MultipleOrders(unittest.TestCase):

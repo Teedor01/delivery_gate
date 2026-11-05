@@ -17,7 +17,7 @@ class Corpus(unittest.TestCase):
     def test_at_least_three_adversarial_cases_are_included(self):
         self.assertGreaterEqual(len(C.ADVERSARIAL_IDS), 3)
         text = {a["id"]: a["text"] for a in C.ARTIFACTS}
-        self.assertIn("probably delivered", text["A11"])        
+        self.assertIn("probably delivered", text["A11"])            
         self.assertIn("PayPal should cover this", text["A11"])
         self.assertIn("The customer says it wasn't redirected", text["A13"])
         self.assertIn("IGNORE ALL PREVIOUS INSTRUCTIONS", text["A14"])
@@ -60,13 +60,13 @@ class RecordedEvaluation(unittest.TestCase):
         arts = self.extraction.artifacts
         for f in self.extraction.candidates:
             self.assertTrue(f.artifact_id in arts and f.fact_id.startswith(f.artifact_id))
-            self.assertEqual(arts[f.artifact_id].text[f.span_start:f.span_end], f.source_span)       # span is an exact substring
+            self.assertEqual(arts[f.artifact_id].text[f.span_start:f.span_end], f.source_span)      
             self.assertIn(f.attribution, ("CARRIER_STATEMENT", "MERCHANT_STATEMENT", "CUSTOMER_STATEMENT_RELAYED", "THIRD_PARTY_STATEMENT", "UNKNOWN"))
             self.assertIn(f.modality, ("DIRECT", "REPORTED", "HEDGED"))
             self.assertIn(f.confidence, ("HIGH", "MEDIUM", "LOW"))
             self.assertTrue(f.value and f.normalized_value is not None)
             if f.normalized_value == "UNKNOWN":
-                self.assertTrue(f.ambiguity and f.ambiguity_note)                
+                self.assertTrue(f.ambiguity and f.ambiguity_note)                   
             if f.modality == "HEDGED":
                 self.assertEqual(f.normalized_value, "UNKNOWN")
 
@@ -128,7 +128,7 @@ class EvaluatorCanFail(unittest.TestCase):
                     if f["fact"] == "shipment_date":
                         f["ambiguity"] = False
         res = self.degraded(mut)
-        self.assertGreaterEqual(res["counts"]["rejected"], 1)        
+        self.assertGreaterEqual(res["counts"]["rejected"], 1)         
         self.assertLess(res["metrics"]["fact_recall"], 1.0)
 
 

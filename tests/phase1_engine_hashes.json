@@ -1,0 +1,15 @@
+{
+ "_note": "SHA-256 of the Phase 1 engine, registry, policy and schema files exactly as approved in the Phase 2 zip. A change to any of them needs a separately reviewed policy change; update this file only as part of that review.",
+ "files": {
+  "delivery_gate/engine.py": "cfa3fe5cb1309e8d96db266c32954a145abab502f5f6e6c7ebc13a12d0663c46",
+  "delivery_gate/registry.py": "b07f3693955ed3e1df7fb230bacd113a0c81a30554e4c2daae051273ae61f4dc",
+  "policy/passages.json": "68b63bbeaa649376c62f8e312dc191d4935b844962212caa73f29b7f85e8822e",
+  "policy/rules/us.sp.inr.json": "605c3e1bba0665c0a51b730dff73aba0370a6fef1e532f57b7126ff4b6769bda",
+  "policy/rules/us.sp.snad.json": "a49baa96ca8b2baf8788e76eca6150b5c3e766377021930c07c600f9f275f00e",
+  "policy/rules/us.sp.unauthorized.json": "5632806464dab46833b3607a1a38be777e9eae324ded18bca64dc7ff18cac823",
+  "policy/sources.json": "8f5ecb3b05f82b7d2e91fd74a10487250a3e2e1a29d0792d4a58989bdfbf9f19",
+  "schemas/assessment.schema.json": "c060bba78c0c7e9d30239289a518dd02786162e43a952d9654c0926e1930beb2",
+  "schemas/extraction.schema.json": "32e707eed2a3a021630dbc48919e1fc1751a3c6d84c49ef5f21b4d02574d4d49",
+  "schemas/rule.schema.json": "e0668297f41b6d0e8c9691ac38dd9563445bb9de8c0d078da1a29ad3179c4993"
+ }
+}

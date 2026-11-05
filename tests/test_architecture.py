@@ -35,7 +35,7 @@ class RegistryRules(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry_with(lambda d: d.update(status="VERIFIED"))
         with self.assertRaises(RegistryError):
-            registry_with(lambda d: d.update(status="REVIEWED"))       
+            registry_with(lambda d: d.update(status="REVIEWED"))      
 
     def test_registry_rejects_bad_rules(self):
         with self.assertRaises(RegistryError):
@@ -209,7 +209,7 @@ class Guardrails(unittest.TestCase):
         for name, t in self.src().items():
             self.assertNotIn("PARTIALLY_ELIGIBLE", t, name)
             self.assertNotIn("NOT_ELIGIBLE", t, name)
-        for p in (ROOT / "policy" / "rules").glob("*.json"):      
+        for p in (ROOT / "policy" / "rules").glob("*.json"):       
             raw = p.read_text()
             self.assertNotIn("PARTIALLY_ELIGIBLE", raw, p.name)
             self.assertNotIn("NOT_ELIGIBLE", raw, p.name)

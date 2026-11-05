@@ -14,7 +14,7 @@ class ArtifactFieldsVsPayPalAcceptance(unittest.TestCase):
             self.assertEqual(c.paypal_acceptance, "NOT_ESTABLISHED", c.check_id)
             self.assertIn(TOKEN, c.does_not_establish, c.check_id)
             if c.status == ES.DEMONSTRATED:
-                self.assertTrue(c.establishes, c.check_id)       
+                self.assertTrue(c.establishes, c.check_id)        
         self.assertIn("not a finding that PayPal accepts", text(a))
 
     def test_the_token_is_only_ever_listed_under_does_not_establish(self):
@@ -65,7 +65,7 @@ class MerchantAssertionsStayConservative(unittest.TestCase):
 
     def test_assertion_is_not_equivalent_to_corroborated_evidence(self):
         a = assess(REG, S.inr_case())
-        self.assertEqual(a.check("inr.ship_to_transaction_address").corroboration, "CORROBORATED")    
+        self.assertEqual(a.check("inr.ship_to_transaction_address").corroboration, "CORROBORATED")      
         self.assertEqual(a.check("inr.proof_of_delivery.record").corroboration, "CORROBORATED")
         self.assertEqual(a.check("inr.timely_response").corroboration, "MERCHANT_ASSERTED_ONLY")       
         self.assertEqual(a.uncorroborated_requirements, ("inr.timely_response",))
@@ -92,7 +92,7 @@ class AddressMatchingStaysStrict(unittest.TestCase):
         self.assertEqual(a.check("inr.proof_of_delivery.recipient_address_matches").status, ES.DEMONSTRATED)
 
     def test_st_and_street_are_not_silently_equated(self):
-        a = self.with_line1("1 Market Street")                         
+        a = self.with_line1("1 Market Street")                       
         m = a.check("inr.proof_of_delivery.recipient_address_matches")
         self.assertEqual((m.status, m.reason_code), (ES.CONTRADICTED, "ADDRESS_MISMATCH"))
         self.assertTrue(m.needs_human_review and a.needs_human_review)

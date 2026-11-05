@@ -28,7 +28,7 @@ class INR(unittest.TestCase):
         a = assess(REG, S.inr_case(route="CARD_ISSUER_CHARGEBACK", funding="CARD"))
         self.assertEqual(a.protection_assessment, PA.NOT_COVERED)
         self.assertEqual(a.reason_codes, ("ROUTE_EXCLUDED",))
-        self.assertEqual(a.checks, ())                   
+        self.assertEqual(a.checks, ())                       
         self.assertIn("SP.excl.inr_issuer", a.gate("inr.gate.route").passage_ids)
         self.assertIn("inr.gate.route", text(a))
 
