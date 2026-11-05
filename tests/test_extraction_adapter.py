@@ -33,7 +33,7 @@ class Adapter(unittest.TestCase):
         self.assertEqual((req["model"], req["temperature"], req["system"]), ("m-1", 0, P.SYSTEM_PROMPT))
         self.assertEqual((headers["x-api-key"], headers["anthropic-version"]), ("k-1", "2023-06-01"))
         self.assertEqual((out.extractor_kind, out.model, out.prompt_sha256), ("ANTHROPIC_API", "m-1", P.PROMPT_SHA256))
-        self.assertEqual(len(validate_output(ART["A01"], out.text).accepted), 7)     
+        self.assertEqual(len(validate_output(ART["A01"], out.text).accepted), 7)     # raw model text goes through the same validator
 
     def test_http_errors_are_not_swallowed(self):
         ex = AnthropicExtractor(model="m", api_key="k", transport=fake_transport("", status=429))
@@ -83,16 +83,16 @@ class PromptSafetyBoundary(unittest.TestCase):
     def test_prompt_hash_is_stable_and_recorded(self):
         self.assertEqual(P.PROMPT_SHA256, __import__("hashlib").sha256(P.SYSTEM_PROMPT.encode()).hexdigest())
         man = json.loads((ROOT / "eval" / "recorded_outputs" / "MANIFEST.json").read_text())
-        self.assertEqual(man["prompt_sha256"], P.PROMPT_SHA256)    
+        self.assertEqual(man["prompt_sha256"], P.PROMPT_SHA256)         # the recorded outputs were produced under THIS prompt
 
 
 class Isolation(unittest.TestCase):
     def test_engine_and_model_path_are_separated(self):
         for p in (ROOT / "delivery_gate").glob("*.py"):
-            self.assertNotIn("delivery_extraction", p.read_text(), p.name)           
+            self.assertNotIn("delivery_extraction", p.read_text(), p.name)            # the engine cannot import the extraction layer
         for name in ("llm.py", "prompt.py", "validate.py", "schema.py", "extractor.py"):
             t = (ROOT / "delivery_extraction" / name).read_text()
-            self.assertIsNone(re.search(r"^\s*(from|import)\s+delivery_gate", t, re.M), name)   
+            self.assertIsNone(re.search(r"^\s*(from|import)\s+delivery_gate", t, re.M), name)   # model path cannot see rules/engine
 
     def test_no_model_training_anywhere(self):
         banned = ("torch", "tensorflow", "sklearn", "transformers", "peft", "datasets", "fine_tune", "finetune", "fit(", "train(")
@@ -103,6 +103,7 @@ class Isolation(unittest.TestCase):
                     self.assertNotIn(b, t.replace("not training", ""), f"{p.name}: {b}")
 
     def test_phase1_package_is_unchanged_in_behaviour(self):
+        # the engine still has no network/LLM code (Phase 1 guard) and still carries the same rule status
         self.assertTrue(all(r.status == "UNREVIEWED" for r in REG.rules.values()))
 
 
