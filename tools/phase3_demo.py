@@ -1,3 +1,4 @@
+"""Phase 3 review artefacts. Run: python tools/phase3_demo.py [chain|handoff|inventory|semantics|sources|exposure|fixtures|disputes]"""
 import json, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
