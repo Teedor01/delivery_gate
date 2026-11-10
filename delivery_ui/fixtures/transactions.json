@@ -1,0 +1,879 @@
+{
+ "_note": "Synthetic demo fixtures. PayPal responses are hand-written from documented shapes and are NOT live PayPal data.",
+ "merchant": {
+  "country": "US",
+  "name": "Demo merchant"
+ },
+ "transactions": [
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-25T10:05:00Z",
+     "artifact_id": "A11",
+     "review": null,
+     "source_label": "Pasted text"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1048",
+   "paypal_dispute": {
+    "create_time": "2026-10-24T09:12:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "480.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20481",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "480.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20481"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-24T09:12:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20481",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "480.00"
+         },
+         "create_time": "2026-10-14T14:32:00Z",
+         "final_capture": true,
+         "id": "FXCAP20481",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-14T14:32:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20481",
+   "scenario_summary": "The customer says the item never arrived. The only evidence on file is a note with no carrier details, so nothing demonstrates delivery. Use What changes? to see what a carrier delivery record would change.",
+   "scenario_title": "Missing delivery evidence, then a counterfactual",
+   "scenarios": [
+    2,
+    6
+   ],
+   "suggested_evidence": [
+    {
+     "artifact_id": "A01",
+     "label": "Carrier delivery email (sample FedEx notification)"
+    }
+   ]
+  },
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-24T08:30:00Z",
+     "artifact_id": "A01",
+     "review": {
+      "at": "2026-10-24T08:45:00Z",
+      "mode": "attest_carrier",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Uploaded file: fedex-delivery-notice.txt"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1046",
+   "paypal_dispute": {
+    "create_time": "2026-10-23T15:40:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "129.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20479",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "129.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20479"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-23T15:40:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20479",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "129.00"
+         },
+         "create_time": "2026-10-13T11:02:00Z",
+         "final_capture": true,
+         "id": "FXCAP20479",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-13T11:02:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20479",
+   "scenario_summary": "A carrier delivery email was added and a reviewer attested that the document itself is genuine. The modeled requirements are demonstrated; PayPal decides.",
+   "scenario_title": "Clean carrier evidence",
+   "scenarios": [
+    1
+   ],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-26T14:00:00Z",
+     "artifact_id": "A08",
+     "review": {
+      "at": "2026-10-26T14:10:00Z",
+      "mode": "attest_carrier",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Pasted text"
+    },
+    {
+     "added_at": "2026-10-26T14:02:00Z",
+     "artifact_id": "A09",
+     "review": {
+      "at": "2026-10-26T14:11:00Z",
+      "mode": "attest_carrier",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Pasted text"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1039",
+   "paypal_dispute": {
+    "create_time": "2026-10-26T13:05:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "320.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20472",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "760.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20472"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-26T13:05:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20472",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "760.00"
+         },
+         "create_time": "2026-10-12T16:20:00Z",
+         "final_capture": true,
+         "id": "FXCAP20472",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-12T16:20:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20472",
+   "scenario_summary": "Two carrier records disagree about where the package went. The conflict is shown, not resolved: a person has to check it.",
+   "scenario_title": "Conflicting addresses",
+   "scenarios": [
+    3
+   ],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-26T09:00:00Z",
+     "artifact_id": "A04",
+     "review": {
+      "at": "2026-10-26T09:05:00Z",
+      "mode": "approve_merchant",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Pasted text"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #A-1042",
+   "paypal_dispute": {
+    "create_time": "2026-10-25T17:30:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "215.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20475",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "215.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20475"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-25T17:30:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20475",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "215.00"
+         },
+         "create_time": "2026-10-15T09:44:00Z",
+         "final_capture": true,
+         "id": "FXCAP20475",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-15T09:44:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20475",
+   "scenario_summary": "The merchant's own message gives a tracking number and dates. It can be recorded as the merchant's statement, but it cannot stand in for a carrier document.",
+   "scenario_title": "Merchant assertion",
+   "scenarios": [
+    4
+   ],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-27T09:00:00Z",
+     "artifact_id": "A01",
+     "review": {
+      "at": "2026-10-27T09:05:00Z",
+      "mode": "attest_carrier",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Pasted text"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1035",
+   "paypal_dispute": {
+    "create_time": "2026-10-27T08:20:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "84.50"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20468",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "84.50"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20468"
+     }
+    ],
+    "reason": "UNAUTHORISED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-27T08:20:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20468",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "84.50"
+         },
+         "create_time": "2026-10-11T10:15:00Z",
+         "final_capture": true,
+         "id": "FXCAP20468",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED"
+          ],
+          "status": "PARTIALLY_ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-11T10:15:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20468",
+   "scenario_summary": "An unauthorized-payment claim. PayPal reports a protection status, but how that value relates to the policy condition is not established, so the result stays unresolved.",
+   "scenario_title": "Unknown PayPal status",
+   "scenarios": [
+    5
+   ],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [
+    {
+     "added_at": "2026-10-27T12:30:00Z",
+     "artifact_id": "A01",
+     "review": {
+      "at": "2026-10-27T12:35:00Z",
+      "mode": "attest_carrier",
+      "reviewer": "Demo reviewer (fixture)"
+     },
+     "source_label": "Pasted text"
+    }
+   ],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1031",
+   "paypal_dispute": {
+    "create_time": "2026-10-27T12:00:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "312.00"
+    },
+    "dispute_channel": "EXTERNAL",
+    "dispute_id": "PP-D-FX20463",
+    "dispute_life_cycle_stage": "CHARGEBACK",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "312.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20463"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-27T12:00:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20463",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "312.00"
+         },
+         "create_time": "2026-10-10T13:50:00Z",
+         "final_capture": true,
+         "id": "FXCAP20463",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "PARTIALLY_REFUNDED",
+         "update_time": "2026-10-10T13:50:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20463",
+   "scenario_summary": "The customer went to their card issuer or bank. PayPal documents that this channel includes both chargebacks and ACH returns, so the dispute route stays unknown.",
+   "scenario_title": "Card-issuer or bank dispute (route unknown)",
+   "scenarios": [],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1029",
+   "paypal_dispute": {
+    "create_time": "2026-10-28T10:00:00Z",
+    "dispute_amount": {
+     "currency_code": "USD",
+     "value": "58.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX20460",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+     {
+      "gross_amount": {
+       "currency_code": "USD",
+       "value": "58.00"
+      },
+      "seller": {
+       "merchant_id": "FXMERCHANT1"
+      },
+      "seller_transaction_id": "FXCAP20460"
+     }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-28T10:00:00Z"
+   },
+   "paypal_order": {
+    "id": "FXORDER20460",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "58.00"
+         },
+         "create_time": "2026-10-09T09:05:00Z",
+         "final_capture": true,
+         "id": "FXCAP20460",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-09T09:05:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20460",
+   "scenario_summary": "PayPal's reason is 'not as described'. Delivery Gate keeps the raw reason but does not map it to a claim category, so no rule is selected.",
+   "scenario_title": "Not-as-described reason (not normalised)",
+   "scenarios": [],
+   "suggested_evidence": []
+  },
+  {
+   "artifacts": [],
+   "merchant_provided": {
+    "answers": {
+     "redirect_detected": false,
+     "response_to_paypal": "NO_REQUEST_OUTSTANDING",
+     "shipped_after_advised_not_to_release": false
+    },
+    "country": "US",
+    "physical_goods": true,
+    "pre_order_or_made_to_order": false,
+    "transaction_details_address": {
+     "city": "San Francisco",
+     "country": "US",
+     "line1": "1 Market St",
+     "postal_code": "94105",
+     "region": "CA"
+    }
+   },
+   "order_ref": "Order #1024",
+   "paypal_dispute": null,
+   "paypal_order": {
+    "id": "FXORDER20455",
+    "payment_source": {
+     "paypal": {
+      "account_id": "FXPAYER1",
+      "account_status": "VERIFIED"
+     }
+    },
+    "purchase_units": [
+     {
+      "payments": {
+       "captures": [
+        {
+         "amount": {
+          "currency_code": "USD",
+          "value": "59.99"
+         },
+         "create_time": "2026-10-08T18:30:00Z",
+         "final_capture": true,
+         "id": "FXCAP20455",
+         "seller_protection": {
+          "dispute_categories": [
+           "ITEM_NOT_RECEIVED",
+           "UNAUTHORIZED_TRANSACTION"
+          ],
+          "status": "ELIGIBLE"
+         },
+         "status": "COMPLETED",
+         "update_time": "2026-10-08T18:30:00Z"
+        }
+       ]
+      },
+      "reference_id": "default",
+      "shipping": {
+       "address": {
+        "address_line_1": "1 Market St",
+        "admin_area_1": "CA",
+        "admin_area_2": "San Francisco",
+        "country_code": "US",
+        "postal_code": "94105"
+       },
+       "name": {
+        "full_name": "Test Buyer"
+       }
+      }
+     }
+    ],
+    "status": "COMPLETED"
+   },
+   "ref": "DG-20455",
+   "scenario_summary": "A completed payment with no dispute. There is nothing to assess until a dispute exists.",
+   "scenario_title": "No dispute reported",
+   "scenarios": [],
+   "suggested_evidence": []
+  }
+ ]
+}
