@@ -1,0 +1,35 @@
+{
+  "_fixture": {
+    "description": "INR dispute through the PayPal channel; the customer disputed 300.00 of a 1200.00 transaction.",
+    "not_a_live_response": true,
+    "provenance": "HAND_WRITTEN_FROM_DOCUMENTED_SHAPE",
+    "shape_source": "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+  },
+  "observed_at": null,
+  "response": {
+    "create_time": "2026-10-25T08:00:00Z",
+    "dispute_amount": {
+      "currency_code": "USD",
+      "value": "300.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX0001",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": [
+      {
+        "gross_amount": {
+          "currency_code": "USD",
+          "value": "1200.00"
+        },
+        "seller": {
+          "merchant_id": "FXMERCHANT0001"
+        },
+        "seller_transaction_id": "FXCAP0000000001"
+      }
+    ],
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-25T09:30:00Z"
+  }
+}

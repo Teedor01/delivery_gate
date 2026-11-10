@@ -1,0 +1,79 @@
+{
+  "_fixture": {
+    "description": "status PARTIALLY_ELIGIBLE with ITEM_NOT_RECEIVED only.",
+    "not_a_live_response": true,
+    "provenance": "HAND_WRITTEN_FROM_DOCUMENTED_SHAPE",
+    "shape_source": "https://developer.paypal.com/api/orders/v2/definitions/capture"
+  },
+  "observed_at": null,
+  "response": {
+    "id": "FXORDER000003",
+    "payer": {
+      "email_address": "buyer@example.com",
+      "payer_id": "FXPAYER00001"
+    },
+    "payment_source": {
+      "paypal": {
+        "account_id": "FXPAYER00001",
+        "account_status": "VERIFIED",
+        "name": {
+          "given_name": "Test",
+          "surname": "Buyer"
+        }
+      }
+    },
+    "purchase_units": [
+      {
+        "payments": {
+          "captures": [
+            {
+              "amount": {
+                "currency_code": "USD",
+                "value": "1200.00"
+              },
+              "create_time": "2026-10-20T10:15:30Z",
+              "final_capture": true,
+              "id": "FXCAP0000000003",
+              "seller_protection": {
+                "dispute_categories": [
+                  "ITEM_NOT_RECEIVED"
+                ],
+                "status": "PARTIALLY_ELIGIBLE"
+              },
+              "seller_receivable_breakdown": {
+                "gross_amount": {
+                  "currency_code": "USD",
+                  "value": "1200.00"
+                },
+                "net_amount": {
+                  "currency_code": "USD",
+                  "value": "1158.60"
+                },
+                "paypal_fee": {
+                  "currency_code": "USD",
+                  "value": "41.40"
+                }
+              },
+              "status": "COMPLETED",
+              "update_time": "2026-10-20T10:15:30Z"
+            }
+          ]
+        },
+        "reference_id": "default",
+        "shipping": {
+          "address": {
+            "address_line_1": "1 Market St",
+            "admin_area_1": "CA",
+            "admin_area_2": "San Francisco",
+            "country_code": "US",
+            "postal_code": "94105"
+          },
+          "name": {
+            "full_name": "Test Buyer"
+          }
+        }
+      }
+    ],
+    "status": "COMPLETED"
+  }
+}

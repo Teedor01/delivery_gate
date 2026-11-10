@@ -1,0 +1,24 @@
+{
+  "_fixture": {
+    "description": "disputed_transactions is a string.",
+    "not_a_live_response": true,
+    "provenance": "HAND_WRITTEN_FROM_DOCUMENTED_SHAPE",
+    "shape_source": "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+  },
+  "observed_at": null,
+  "response": {
+    "create_time": "2026-10-25T08:00:00Z",
+    "dispute_amount": {
+      "currency_code": "USD",
+      "value": "300.00"
+    },
+    "dispute_channel": "INTERNAL",
+    "dispute_id": "PP-D-FX0010",
+    "dispute_life_cycle_stage": "INQUIRY",
+    "dispute_state": "REQUIRED_ACTION",
+    "disputed_transactions": "not-an-array",
+    "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+    "status": "WAITING_FOR_SELLER_RESPONSE",
+    "update_time": "2026-10-25T09:30:00Z"
+  }
+}
