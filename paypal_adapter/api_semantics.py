@@ -1,3 +1,14 @@
+"""API-semantics layer: what PayPal's own API documentation says a field or enum value MEANS, kept strictly separate from legal-policy equivalence.
+
+Two different questions are never merged here:
+  (a) What does PayPal's API reference say this value describes?     -> recorded below, with source anchors (documented_meaning)
+  (b) Is it the same thing as a Seller Protection legal condition,
+      e.g. the eligibility mark on the Transaction Details page?     -> legal_policy_equivalence, always NOT_ESTABLISHED
+
+Nothing in this module is read by the Phase 1 engine, and nothing here maps a value to a legal conclusion. Meanings are paraphrased; each row carries
+the URL (with the field anchor where the page has one) it was read from on `retrieved`.
+`described_claim_types` uses PayPal's own phrasing of the claim (API vocabulary), NOT Delivery Gate's ClaimCategory names, so that no equivalence is implied.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
@@ -34,9 +45,9 @@ class ApiValueSemantics:
     api: str
     field: str
     value: str
-    meaning_status: str                       
+    meaning_status: str                       # DOCUMENTED | NAME_ONLY (value is listed, no primary meaning retrieved)
     documented_meaning: Optional[str]
-    described_claim_types: Tuple[str, ...] 
+    described_claim_types: Tuple[str, ...]    # PayPal's own phrasing, not Delivery Gate vocabulary
     sources: Tuple[str, ...]
     legal_policy_equivalence: str = "NOT_ESTABLISHED"
     equivalence_note: str = ""

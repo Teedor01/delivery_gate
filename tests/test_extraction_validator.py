@@ -85,7 +85,7 @@ class ClosedVocabularyAndPolicyLanguage(unittest.TestCase):
         a = art("Delivered to 1 Market St. PayPal should cover this.")
         span = "Delivered to 1 Market St. PayPal should cover this."
         rep = validate_output(a, mk_out(a, [mk_fact(a, source_span=span, value="Delivered")]))
-        self.assertEqual(len(rep.accepted), 1)            
+        self.assertEqual(len(rep.accepted), 1)             # the span quotes the artifact; only model-authored fields are screened
         self.assertNotIn("cover", json.dumps({k: v for k, v in rep.accepted[0].to_dict().items() if k != "source_span"}).lower())
 
 
@@ -123,10 +123,10 @@ class GroundingAndAbsence(unittest.TestCase):
 
     def test_dates_are_only_resolved_when_complete_and_unambiguous(self):
         for text, span, value, nv, code in (
-                ("delivered Oct 19", "Oct 19", "Oct 19", "2026-10-19", "UNGROUNDED_DATE"),                 
-                ("delivered Tuesday at noon", "Tuesday", "Tuesday", "2026-10-20", "UNGROUNDED_DATE"),      
+                ("delivered Oct 19", "Oct 19", "Oct 19", "2026-10-19", "UNGROUNDED_DATE"),                 # no year: never guessed
+                ("delivered Tuesday at noon", "Tuesday", "Tuesday", "2026-10-20", "UNGROUNDED_DATE"),       # weekday only
                 ("delivered 10/11/2026", "10/11/2026", "10/11/2026", "2026-10-11", "DATE_AMBIGUOUS_NUMERIC"),
-                ("delivered 10/20/26", "10/20/26", "10/20/26", "2026-10-20", "UNGROUNDED_DATE")):           
+                ("delivered 10/20/26", "10/20/26", "10/20/26", "2026-10-20", "UNGROUNDED_DATE")):           # two-digit year
             rep = self.one(text, fact="delivery_date", value=value, normalized_value=nv, source_span=span)
             self.assertIn(code, reasons_of(rep), text)
 
@@ -151,10 +151,10 @@ class GroundingAndAbsence(unittest.TestCase):
         a_txt = "Delivered to 1 Market St"
         rep = self.one(a_txt, fact="recipient_address", value="1 Market St", normalized_value={"line1": "1 Market St", "city": "San Francisco"},
                        source_span="Delivered to 1 Market St")
-        self.assertIn("UNGROUNDED_ADDRESS_COMPONENT", reasons_of(rep))                       
+        self.assertIn("UNGROUNDED_ADDRESS_COMPONENT", reasons_of(rep))                       # invented city
         rep = self.one(a_txt, fact="recipient_address", value="1 Market St", normalized_value={"line1": "1 Market Street"},
                        source_span="Delivered to 1 Market St")
-        self.assertIn("UNGROUNDED_ADDRESS_COMPONENT", reasons_of(rep))                       
+        self.assertIn("UNGROUNDED_ADDRESS_COMPONENT", reasons_of(rep))                       # 'St' silently expanded
         ok = self.one(a_txt, fact="recipient_address", value="1 Market St", normalized_value={"line1": "1 Market St"}, source_span="Delivered to 1 Market St")
         self.assertEqual(len(ok.accepted), 1)
 

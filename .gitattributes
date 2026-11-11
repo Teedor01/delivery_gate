@@ -1,0 +1,5 @@
+# Force LF so the Phase 1 hash guard (tests/phase1_engine_hashes.json) is byte-stable on every OS,
+# including Windows checkouts with core.autocrlf=true.
+* text=auto eol=lf
+*.png binary
+*.zip binary

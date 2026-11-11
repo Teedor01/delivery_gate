@@ -1,3 +1,10 @@
+"""Authoring script for eval/recorded_outputs/*.json.
+
+THESE ARE NOT LIVE MODEL CALLS. They are the raw outputs the assistant (Claude) produced in the build conversation by following
+delivery_extraction/prompt.py on each artifact, transcribed into JSON files here. They exist so the validator, bridge, engine and
+evaluation can be replayed offline. Because the same assistant also wrote the gold labels, the evaluation numbers are NOT an
+independent measure of model accuracy. Re-run the evaluation with a real extractor (AnthropicExtractor) for that.
+"""
 import hashlib, json, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

@@ -1,3 +1,14 @@
+"""Handoff: observations -> Phase 1 `Case`. The only module in this package that imports delivery_gate.
+
+The plans below are closed. They add no policy interpretation and the Phase 1 engine and policy files are untouched (a hash test guards that).
+  Orders capture  -> paypal_seller_protection_status (opaque token, unchanged), currency
+  Disputes API    -> claim_category (documented normalization, only if established), route (documented normalization, INTERNAL only)
+                     and only when the dispute is linked to the capture by an observed identifier
+  merchant        -> merchant_account_country, only as an explicit merchant assertion
+Deliberately NOT handed over: transaction_amount. The Phase 1 SNAD rule consumes it as a conservative lower bound of exposure, but PayPal documents that a
+dispute's amount can be less than the original transaction amount, so presenting the capture amount that way is not supported. The amount is carried in
+`exposure.build_exposure` as 'original_transaction_value'. Changing that engine behaviour needs a separately reviewed policy change.
+"""
 from __future__ import annotations
 
 import json
@@ -52,6 +63,7 @@ class HandoffResult:
 
 
 def _provenance(o: Observation) -> Provenance:
+    # source_ref is the observation id, which resolves to the full record (raw value, field path, doc ref, response hash) in the observation bundle
     return Provenance(SourceType.PAYPAL_API, o.observation_id, ProvStatus.SYSTEM_RECORD, None, o.observed_at)
 
 

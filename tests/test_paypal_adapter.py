@@ -1,3 +1,4 @@
+"""Phase 3: PayPal observation adapter. Fixtures only: no live sandbox call exists, and nothing here claims one."""
 import ast, copy, itertools, json, unittest
 from pathlib import Path
 from delivery_gate.adapters import PayPalSandboxSource
@@ -27,8 +28,8 @@ class Inventory(unittest.TestCase):
         self.assertFalse([f.path for f in inventory.INVENTORY if f.policy_equivalence == "ESTABLISHED"])
         status = next(f for f in inventory.INVENTORY if f.path == "capture.seller_protection.status")
         self.assertEqual(status.policy_equivalence, "NOT_ESTABLISHED")
-        self.assertEqual(status.semantics, Semantics.OBSERVED_AND_DOCUMENTED)      
-        self.assertIn("Transaction Details", status.note)                           
+        self.assertEqual(status.semantics, Semantics.OBSERVED_AND_DOCUMENTED)      # the API meaning IS documented...
+        self.assertIn("Transaction Details", status.note)                           # ...and the equivalence gap is stated
 
     def test_unverified_or_unknown_fields_are_never_engine_facts(self):
         for f in inventory.INVENTORY:
@@ -49,7 +50,7 @@ class Provenance_(unittest.TestCase):
                 self.assertTrue(o.observation_id.startswith("fixture:paypal-capture:") and o.field_path and o.local_path, n)
                 self.assertTrue(o.doc_ref.startswith("https://"), n)
                 self.assertEqual(o.response_sha256, sha, n)
-                self.assertIsNone(o.observed_at, n)                     
+                self.assertIsNone(o.observed_at, n)                      # never invented
                 self.assertIn(o.semantics, {s.value for s in Semantics})
 
     def test_raw_values_are_exactly_what_the_response_held(self):
@@ -80,7 +81,8 @@ class Provenance_(unittest.TestCase):
     def test_fixtures_are_labelled_as_fixtures_everywhere(self):
         for p in FIXTURES.glob("*.json"):
             self.assertTrue(json.loads(p.read_text())["_fixture"]["not_a_live_response"], p.name)
-        self.assertTrue(all(f.provenance.source_ref.startswith("fixture:")
+        self.assertTrue(all(f.provenance.source_ref.startswith("fixture:") for f in handoff(response("01_normal")).case.transaction_facts))
+        with self.assertRaises(NotImplementedError):                       # no live sandbox source exists
             PayPalSandboxSource().load_case("x")
 
 
@@ -214,7 +216,7 @@ class MissingAndMalformed(unittest.TestCase):
         co = adapter.observe_capture_resource(c, origin="FIXTURE")
         self.assertEqual(co.find("amount.value").normalized_value, "1200.00")
         self.assertEqual(to_case(co).case.fact("currency").value, "USD")
-        self.assertIsNone(co.find("unit.shipping.address"))                  
+        self.assertIsNone(co.find("unit.shipping.address"))                  # no purchase-unit context exists for this resource
 
 
 class WithheldFields(unittest.TestCase):
@@ -242,9 +244,9 @@ class WithheldFields(unittest.TestCase):
     def test_payment_source_records_type_keys_only(self):
         o = observe(response("06_unknown_funding_source")).select_capture().find("order.payment_source.types")
         self.assertEqual(o.raw_value, ["novel_wallet"])
-        self.assertNotIn("FXPAYER", json.dumps(o.to_dict()))                 
+        self.assertNotIn("FXPAYER", json.dumps(o.to_dict()))                 # the payer details are not copied
         a = assessment(response("06_unknown_funding_source"), "ITEM_NOT_RECEIVED", route="CARD_ISSUER_CHARGEBACK")
-        self.assertTrue(any("funding_source_not_supplied" in x["open_id"] for x in a.open_items))  
+        self.assertTrue(any("funding_source_not_supplied" in x["open_id"] for x in a.open_items))   # stays an open UNKNOWN, not assumed
 
     def test_engine_never_receives_a_policy_fact_from_the_adapter(self):
         for n in FIXTURE_NAMES:
@@ -286,8 +288,8 @@ class CriticalTokenTest(unittest.TestCase):
     def test_the_only_difference_between_tokens_is_the_echoed_observation(self):
         a = assessment(with_status(response("01_normal"), "ELIGIBLE"), "UNAUTHORIZED_TRANSACTION")
         b = assessment(with_status(response("01_normal"), "NOT_ELIGIBLE"), "UNAUTHORIZED_TRANSACTION")
-        self.assertNotEqual(a.digest, b.digest)                               
-        self.assertEqual(policy_view(a, "ELIGIBLE"), policy_view(b, "NOT_ELIGIBLE"))   
+        self.assertNotEqual(a.digest, b.digest)                               # the observed value is recorded, so the raw digest differs...
+        self.assertEqual(policy_view(a, "ELIGIBLE"), policy_view(b, "NOT_ELIGIBLE"))   # ...and nothing else does
 
     def test_missing_token_differs_only_by_the_missing_marker(self):
         have = assessment(response("01_normal"), "UNAUTHORIZED_TRANSACTION")
@@ -307,11 +309,11 @@ class EndToEnd(unittest.TestCase):
 
     def test_engine_snad_exposure_no_longer_receives_the_capture_amount(self):
         a = assessment(response("01_normal"), "SIGNIFICANTLY_NOT_AS_DESCRIBED")
-        self.assertIsNone(a.exposure["exposure_floor"])                          
+        self.assertIsNone(a.exposure["exposure_floor"])                          # the capture amount is not presented to the engine as a bound
         self.assertIsNone(a.exposure["known_lower_bound"])
         self.assertEqual(a.exposure["currency"], "USD")
         self.assertIn({"cost_id": "transaction_amount", "reason": "AMOUNT_UNKNOWN"}, a.exposure["unknown_additional_costs"])
-        self.assertEqual(a.protection_assessment, ProtectionAssessment.NOT_COVERED)   
+        self.assertEqual(a.protection_assessment, ProtectionAssessment.NOT_COVERED)   # SNAD is NOT_COVERED regardless
 
     def test_fixture_source_implements_the_phase1_interface(self):
         src = PayPalFixtureSource(FIXTURES)

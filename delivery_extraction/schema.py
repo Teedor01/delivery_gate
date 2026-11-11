@@ -35,7 +35,7 @@ MAX_SPAN_CHARS = 400
 class Artifact:
     artifact_id: str
     text: str
-    declared_kind: str = "OTHER"    
+    declared_kind: str = "OTHER"      
 
     def __post_init__(self):
         if self.declared_kind not in ARTIFACT_KINDS:

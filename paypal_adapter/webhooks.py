@@ -1,3 +1,12 @@
+"""Webhook intake: a VERIFIED notification may do exactly one thing, which is to request a fresh Disputes API read.
+
+  * the notification payload is a trigger, never a source of facts: the decision carries only the dispute id, event id and event type, so nothing from
+    the payload (amounts, reasons, channel, status) can reach observations, the handoff or the engine;
+  * verification uses PayPal's documented mechanism (five transmission headers, then POST /v1/notifications/verify-webhook-signature returning
+    verification_status SUCCESS or FAILURE). The verifier is INJECTED. No network call exists in this package, and the default verifier fails closed;
+  * anything other than an explicit SUCCESS is a rejection; a verifier that raises is a rejection;
+  * a repeated event id is rejected (in-memory only; durable idempotency needs storage and is out of scope).
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -67,7 +76,7 @@ class WebhookReceiver:
     def _verified(self, headers: Mapping[str, str], event: Dict[str, Any]) -> bool:
         try:
             return self._verifier.verify(headers, event, self._webhook_id) == "SUCCESS"
-        except Exception:                             
+        except Exception:                                    # a verifier that fails is a rejection, never an acceptance
             return False
 
     @staticmethod

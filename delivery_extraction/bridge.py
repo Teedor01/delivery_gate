@@ -83,7 +83,7 @@ def build_case(base_case: Case, candidates: Sequence[CandidateFact], artifacts: 
                             "source_authenticity": prov.source_authenticity.value if prov.source_authenticity else None,
                             "source_ref": prov.source_ref, "reviewed": d is not None})
         res.evidence_index.setdefault(spec["engine"], []).append(c.fact_id)
-    for aid in sorted(carrier_artifacts):                   
+    for aid in sorted(carrier_artifacts):                     
         ev = EvidenceFact("delivery_record", True, Provenance(SourceType.CARRIER_DOCUMENT, f"{aid}#attestation", ProvStatus.HUMAN_CONFIRMED, None, None, None, SourceAuthenticity.REVIEWED))
         items.append(ev)
         res.bridged.append({"fact_id": f"{aid}#attestation", "fact": "reviewer_attestation", "artifact_id": aid,

@@ -39,7 +39,7 @@ class EvidenceAssessment:
     interpretation_note: Optional[str] = None
     needs_human_review: bool = False
     establishes: Optional[str] = None            
-    corroboration: str = "NOT_APPLICABLE"       
+    corroboration: str = "NOT_APPLICABLE"        
     paypal_acceptance: str = PAYPAL_ACCEPTANCE_NOT_ESTABLISHED
     does_not_establish: Tuple[str, ...] = (NOT_ESTABLISHED_CLAIM,)
 

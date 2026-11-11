@@ -1,3 +1,12 @@
+"""Disputes API observation adapter (GET /v1/customer/disputes/{id}, 'show dispute details'). Observation only, like adapter.py.
+
+Source roles (decided by the reviewer, enforced here):
+  claim reason      -> `reason`, raw value always preserved; normalised to a Delivery Gate claim category ONLY where the table says established
+  lifecycle stage   -> `dispute_life_cycle_stage`, its own observation, never merged with reason or route
+  dispute route     -> UNKNOWN unless PayPal explicitly exposes and documents it: only `dispute_channel` does, and only INTERNAL is normalised
+  disputed amount   -> `dispute_amount`, kept apart from the original transaction value
+Nothing is inferred from the claim reason: the route never depends on `reason`, and `reason` never depends on the channel or stage.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -20,8 +29,8 @@ DOCUMENTED_CHANNELS = frozenset({"INTERNAL", "EXTERNAL", "ALERT"})
 
 @dataclass(frozen=True)
 class Normalization:
-    delivery_gate_value: Optional[str]   
-    established: bool                   
+    delivery_gate_value: Optional[str]   # None = no normalisation: the Delivery Gate fact stays missing
+    established: bool                    # True only where PayPal's documentation states the meaning the normalisation relies on
     basis: Tuple[str, ...]
     note: str
 
@@ -29,6 +38,7 @@ class Normalization:
         return {"delivery_gate_value": self.delivery_gate_value, "established": self.established, "basis": list(self.basis), "note": self.note}
 
 
+# reason -> Delivery Gate claim category. Documented normalisation, table version 1.
 CLAIM_REASON_TABLE_V1: Dict[str, Normalization] = {
     "MERCHANDISE_OR_SERVICE_NOT_RECEIVED": Normalization("ITEM_NOT_RECEIVED", True, (sem.DISPUTES_WEBHOOKS, sem.DISPUTES_GUIDE),
                                                           "PayPal describes the reason as the customer not receiving the merchandise or service."),
@@ -38,6 +48,7 @@ CLAIM_REASON_TABLE_V1: Dict[str, Normalization] = {
                                                               "NOT applied: the value is listed but no PayPal description of it was retrieved, and 'not as described' vs the policy's "
                                                               "'significantly not as described' is not established by name alone. Set established=True only after a primary description is recorded."),
 }
+# dispute_channel -> Delivery Gate route. Only INTERNAL is normalised.
 CHANNEL_ROUTE_TABLE_V1: Dict[str, Normalization] = {
     "INTERNAL": Normalization("PAYPAL_DISPUTE", True, (sem.DISPUTES_REF + "#dispute_channel", sem.DISPUTES_OVERVIEW + "#internal-disputes"),
                               "PayPal documents INTERNAL as the customer contacting PayPal to file a dispute with the merchant."),

@@ -134,7 +134,7 @@ def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str]) -> None:
         if nv is True and (neg.search(span) or not pos.search(span)):
             reasons.append("UNGROUNDED_BOOLEAN")
         if nv is False and not neg.search(span):
-            reasons.append("UNGROUNDED_BOOLEAN")        
+            reasons.append("UNGROUNDED_BOOLEAN")         
     elif typ == "address":
         if not isinstance(nv, dict) or not nv or not set(nv) <= set(ADDRESS_FIELDS) or not all(isinstance(v, str) and v for v in nv.values()):
             reasons.append("BAD_TYPE"); return
@@ -193,7 +193,6 @@ def _validate_fact(f: Any, artifact: Artifact, seen_ids: set) -> Tuple[Optional[
         reasons.append("SPAN_NOT_FOUND_IN_ARTIFACT")      
     if reasons:
         return None, reasons
-    # semantic guards that need a well-formed fact
     if HEDGE.search(span) and f["modality"] != "HEDGED":
         reasons.append("HEDGE_NOT_PRESERVED")
     if f["modality"] == "HEDGED" and (f["normalized_value"] != UNKNOWN or f["ambiguity"] is not True):
@@ -222,7 +221,7 @@ def validate_output(artifact: Artifact, raw_text: str) -> ValidationReport:
         rep.output_ok, rep.output_errors = False, ["OUTPUT_NOT_AN_OBJECT"]
         return rep
     extra, missing = set(doc) - set(OUTPUT_KEYS), set(OUTPUT_KEYS) - set(doc)
-    if extra or missing:                                   # e.g. a smuggled `decision` / `protection_assessment` key
+    if extra or missing:                                   
         rep.output_ok = False
         rep.output_errors = ([f"UNKNOWN_TOP_LEVEL_KEYS:{','.join(sorted(extra))}"] if extra else []) + \
                             ([f"MISSING_TOP_LEVEL_KEYS:{','.join(sorted(missing))}"] if missing else [])

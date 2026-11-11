@@ -76,13 +76,13 @@ class MissingAndUnsupportedStayMissing(unittest.TestCase):
 
 class ReviewBoundary(unittest.TestCase):
     def test_carrier_approval_requires_attestation_kind_and_attribution(self):
-        with self.assertRaises(ReviewError):                                  
+        with self.assertRaises(ReviewError):                                   # no attestation
             build_case(base_case(), facts_of("A01"), ART, approve("A01", ["f1"]))
-        with self.assertRaises(ReviewError):                                  
+        with self.assertRaises(ReviewError):                                   # artifact kind OTHER is never a carrier document
             build_case(base_case(), facts_of("A06"), ART, approve("A06", ["f1"]), [Attestation("A06", "r")])
-        with self.assertRaises(ReviewError):                                  
+        with self.assertRaises(ReviewError):                                   # a merchant statement is never a carrier document
             build_case(base_case(), facts_of("A04"), ART, approve("A04", ["f4"]), [Attestation("A04", "r")])
-        with self.assertRaises(ReviewError):                                   
+        with self.assertRaises(ReviewError):                                   # relayed customer claim, even if the artifact kind were carrier
             build_case(base_case(), facts_of("A13"), ART, approve("A13", ["f1"]), [Attestation("A13", "r")])
 
     def test_attribution_and_modality_block_promotion_even_when_the_artifact_kind_is_carrier(self):

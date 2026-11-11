@@ -1,3 +1,5 @@
+"""Phase 3 architectural refinement: content ATTRIBUTION (who a statement is attributed to) is kept apart from source AUTHENTICITY
+(is the artifact genuine). `attribution = CARRIER_STATEMENT` never implies an authentic artifact."""
 import unittest
 from unittest import mock
 from dataclasses import replace
@@ -48,7 +50,7 @@ def auth_violations():
             return f"an attestation was created with authenticity {a!r}"
 
     def attribution_alone_is_not_authenticity():
-        br = build_case(base_case(), facts_of("A01"), ART)                              
+        br = build_case(base_case(), facts_of("A01"), ART)                              # carrier-attributed facts, nobody reviewed anything
         if not br.bridged:
             return "expected unreviewed facts to be bridged"
         for b in br.bridged:
@@ -88,25 +90,25 @@ def auth_violations():
     return v
 
 
-def _m_attribution_grants_review(f, decision, artifact, attested):         
+def _m_attribution_grants_review(f, decision, artifact, attested):         # a carrier-attributed fact is treated as an authentic carrier document
     if decision is None and f.attribution == "CARRIER_STATEMENT":
         return Provenance(ST.CARRIER_DOCUMENT, f.fact_id, ProvStatus.HUMAN_CONFIRMED, None, None, f.source_span, SA.REVIEWED)
     return ORIG_PROVENANCE(f, decision, artifact, attested)
 
 
-def _m_no_attestation_needed(f, decision, artifact, attested):            
+def _m_no_attestation_needed(f, decision, artifact, attested):             # the attestation requirement is skipped
     if decision is not None and decision.action == ReviewAction.APPROVE_AS_CARRIER_DOCUMENT:
         return Provenance(ST.CARRIER_DOCUMENT, f.fact_id, ProvStatus.HUMAN_CONFIRMED, None, None, f.source_span, SA.REVIEWED)
     return ORIG_PROVENANCE(f, decision, artifact, attested)
 
 
-def _m_merchant_approval_reviewed(f, decision, artifact, attested):        
+def _m_merchant_approval_reviewed(f, decision, artifact, attested):        # agreeing with the text is treated as authenticating the artifact
     if decision is not None and decision.action == ReviewAction.APPROVE_AS_MERCHANT_ASSERTION:
         return Provenance(ST.MERCHANT_STATEMENT, f.fact_id, ProvStatus.HUMAN_CONFIRMED, None, None, f.source_span, SA.REVIEWED)
     return ORIG_PROVENANCE(f, decision, artifact, attested)
 
 
-def _m_reviewer_verifies(f, decision, artifact, attested):                 
+def _m_reviewer_verifies(f, decision, artifact, attested):                 # the reviewer path hands out VERIFIED
     p = ORIG_PROVENANCE(f, decision, artifact, attested)
     return Provenance(ST.CARRIER_API, p.source_ref, ProvStatus.SYSTEM_RECORD, None, None, None, SA.VERIFIED) if p.source_type == ST.CARRIER_DOCUMENT else p
 
@@ -123,9 +125,9 @@ class Refinement(unittest.TestCase):
     def test_verified_is_a_separate_provenance_source_not_an_upgrade_of_the_reviewed_document(self):
         api = Provenance(ST.CARRIER_API, "carrier-api:1Z999", ProvStatus.SYSTEM_RECORD, source_authenticity=SA.VERIFIED)
         self.assertEqual((api.source_type, api.source_authenticity), (ST.CARRIER_API, SA.VERIFIED))
-        e = EvidenceFact("delivery_record", True, api)                                 
+        e = EvidenceFact("delivery_record", True, api)                                   # representable and accepted by the engine's model
         self.assertEqual(e.provenance.source_authenticity, SA.VERIFIED)
-        with self.assertRaises(ValueError):                                              
+        with self.assertRaises(ValueError):                                              # the document path can never be VERIFIED
             Provenance(ST.CARRIER_DOCUMENT, "x", ProvStatus.HUMAN_CONFIRMED, source_authenticity=SA.VERIFIED)
 
     def test_the_bridge_never_produces_verified_from_any_review_path(self):
@@ -137,7 +139,7 @@ class Refinement(unittest.TestCase):
                 try:
                     br = build_case(base_case(), facts, ART, approve(aid, ids, action), [Attestation(aid, "r")])
                 except ReviewError:
-                    continue                                                              
+                    continue                                                              # promotion refused: nothing produced
                 produced += len(br.bridged)
                 self.assertTrue(all(b["source_authenticity"] != "VERIFIED" for b in br.bridged), (aid, action))
                 self.assertTrue(all(b["source_authenticity"] in ("UNVERIFIED", "REVIEWED") for b in br.bridged), (aid, action))

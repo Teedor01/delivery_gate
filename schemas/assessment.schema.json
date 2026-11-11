@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Gate assessment (Phase 1)",
+  "type": "object",
+  "required": [
+    "case_id",
+    "policy_status",
+    "display_notice",
+    "rule",
+    "protection_assessment",
+    "evidence_fields_assessment",
+    "paypal_acceptance",
+    "reason_codes",
+    "observed_inputs",
+    "gates",
+    "policy_conditions",
+    "exclusions",
+    "checks",
+    "uncorroborated_requirements",
+    "open_items",
+    "not_modeled",
+    "unknowns",
+    "needs_human_review",
+    "timing_requirement",
+    "exposure",
+    "scope_note",
+    "explanation",
+    "digest"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "rule": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "rule_id, version, status, jurisdiction, file_sha256, sources[url,title,retrieved_at,source_hash], policy_effect, eligibility_determination"
+    },
+    "protection_assessment": {
+      "enum": [
+        "NOT_COVERED",
+        "REQUIREMENTS_NOT_DEMONSTRATED",
+        "REQUIREMENTS_DEMONSTRATED_PAYPAL_DECIDES",
+        "UNSUPPORTED_JURISDICTION",
+        "UNKNOWN"
+      ],
+      "description": "There is deliberately no 'protected' value."
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate_id",
+          "gate_type",
+          "outcome",
+          "reason_code",
+          "detail",
+          "passage_ids",
+          "inputs_used"
+        ]
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "exclusion_id",
+          "state",
+          "reason_code",
+          "passage_ids"
+        ]
+      }
+    },
+    "checks": {
+      "type": "array",
+      "description": "Layer EVIDENCE_ASSESSMENT: one entry per modeled policy requirement.",
+      "items": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "kind",
+          "status",
+          "reason_code",
+          "detail",
+          "passage_ids",
+          "inputs_used",
+          "interpretation",
+          "needs_human_review",
+          "establishes",
+          "corroboration",
+          "paypal_acceptance",
+          "does_not_establish"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "DEMONSTRATED",
+              "NOT_DEMONSTRATED",
+              "CONTRADICTED",
+              "NEEDS_HUMAN_REVIEW",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      }
+    },
+    "open_items": {
+      "type": "array",
+      "description": "Layer UNKNOWN: requirements/conditions the engine cannot evaluate (e.g. timing_requirement = UNKNOWN_CLOCK | TIMESTAMPS_MISSING)."
+    },
+    "not_modeled": {
+      "type": "array"
+    },
+    "unknowns": {
+      "type": "array"
+    },
+    "needs_human_review": {
+      "type": "boolean"
+    },
+    "timing_requirement": {
+      "enum": [
+        "UNKNOWN_CLOCK",
+        "TIMESTAMPS_MISSING",
+        null
+      ]
+    },
+    "exposure": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "SNAD only: exposure_floor, documented_additional_costs, unknown_additional_costs, known_lower_bound, total_exposure = UNBOUNDED_BY_CURRENT_MODEL."
+    },
+    "scope_note": {
+      "type": "string"
+    },
+    "explanation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "digest": {
+      "type": "string",
+      "description": "sha256 over the canonical case snapshot + assessment; identical inputs and rule files give an identical digest."
+    },
+    "policy_status": {
+      "enum": [
+        "UNREVIEWED",
+        "REVIEWED",
+        "NO_RULE_SELECTED"
+      ],
+      "description": "Always carried. UNREVIEWED = rules and sources not raw-byte verified; a UI must never present the assessment as an officially verified PayPal interpretation."
+    },
+    "display_notice": {
+      "type": "string",
+      "description": "Text a UI must show alongside the assessment."
+    },
+    "evidence_fields_assessment": {
+      "enum": [
+        "REQUIREMENT_FIELDS_DEMONSTRATED",
+        "REQUIREMENT_FIELDS_NOT_DEMONSTRATED",
+        "NOT_EVALUATED"
+      ],
+      "description": "Whether the FIELDS named by each policy requirement are present/consistent in the supplied artifacts. Not a statement about PayPal acceptance."
+    },
+    "paypal_acceptance": {
+      "const": "NOT_ESTABLISHED",
+      "description": "No policy text retrieved says an artifact is sufficient proof."
+    },
+    "observed_inputs": {
+      "type": "object",
+      "description": "merchant_account_country, claim_category, route, funding_source, paypal_seller_protection_status (status_semantics=UNKNOWN), physical_goods: each SUPPLIED / NOT_SUPPLIED / PROVENANCE_UNKNOWN. Nothing is defaulted."
+    },
+    "policy_conditions": {
+      "type": "array",
+      "description": "Conditions that depend on opaque PayPal values: observation (PAYPAL_STATUS_OBSERVED / NOT_SUPPLIED / PROVENANCE_UNKNOWN), status_semantics, POLICY_STATUS_MAPPING (UNKNOWN unless established by primary documentation), state."
+    },
+    "uncorroborated_requirements": {
+      "type": "array",
+      "description": "Requirements demonstrated only by merchant assertion."
+    }
+  }
+}

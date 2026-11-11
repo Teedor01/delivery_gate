@@ -1,3 +1,13 @@
+"""Exposure components: three different quantities that must never be conflated.
+
+  original_transaction_value  the capture's amount (Orders v2). What was paid. It is NOT a disputed amount and NOT a bound on exposure.
+  disputed_amount             `dispute_amount` from the Disputes API: what the customer actually disputed. PayPal documents that it may be less than the
+                              original transaction's gross or net amount. UNKNOWN unless a dispute that links to this capture has been observed.
+  potential_seller_exposure   what the seller could lose. UNKNOWN in Phase 3: no reviewed policy rule defines it, so nothing here derives it
+                              (not from the capture amount, and not from the disputed amount either).
+
+This is a read-only view over observations. It never touches the Phase 1 engine, and it deliberately uses no 'floor' or 'minimum' vocabulary.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

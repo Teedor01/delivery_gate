@@ -1,0 +1,161 @@
+{
+  "source_roles": [
+    {
+      "input_name": "original_transaction_value",
+      "source": "Orders v2 capture: amount.value / currency_code",
+      "role": "PRIMARY",
+      "provenance": "PAYPAL_API / SYSTEM_RECORD",
+      "mandatory": true,
+      "implemented": "IMPLEMENTED_FIXTURES",
+      "reaches_engine_as": "currency only; the amount is held in the exposure view and NOT handed to the engine",
+      "note": "The Phase 1 SNAD rule would treat a handed-over amount as a lower bound of exposure; PayPal documents that disputes can be partial."
+    },
+    {
+      "input_name": "disputed_amount",
+      "source": "Disputes API show-dispute-details: dispute_amount",
+      "role": "PRIMARY",
+      "provenance": "PAYPAL_API / SYSTEM_RECORD",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_FIXTURES",
+      "reaches_engine_as": "not handed to the engine (no engine consumer); reported in the exposure view",
+      "note": "UNKNOWN until a dispute linked to the capture has been read."
+    },
+    {
+      "input_name": "claim_category / reason",
+      "source": "Disputes API: reason (raw value preserved)",
+      "role": "PRIMARY",
+      "provenance": "PAYPAL_API / SYSTEM_RECORD",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_FIXTURES",
+      "reaches_engine_as": "claim_category, only where the normalization table marks the reason established",
+      "note": "CLAIM_REASON_TABLE_V1; NOT_AS_DESCRIBED is not normalised yet."
+    },
+    {
+      "input_name": "lifecycle_stage",
+      "source": "Disputes API: dispute_life_cycle_stage (separate field)",
+      "role": "PRIMARY",
+      "provenance": "PAYPAL_API / SYSTEM_RECORD",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_FIXTURES",
+      "reaches_engine_as": "observation only (the engine has no lifecycle fact)",
+      "note": "Never merged with reason or route; a stage is not a route."
+    },
+    {
+      "input_name": "dispute_route",
+      "source": "Disputes API: dispute_channel (the only explicit, documented channel field)",
+      "role": "PRIMARY",
+      "provenance": "PAYPAL_API / SYSTEM_RECORD",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_FIXTURES",
+      "reaches_engine_as": "route = PAYPAL_DISPUTE for INTERNAL only; EXTERNAL and ALERT leave route unknown",
+      "note": "Never inferred from the claim reason or the lifecycle stage."
+    },
+    {
+      "input_name": "merchant_account_country",
+      "source": "Merchant-asserted configuration",
+      "role": "ASSERTED",
+      "provenance": "MERCHANT_INPUT / MERCHANT_ASSERTED",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_INTERFACE_ONLY",
+      "reaches_engine_as": "merchant_account_country, or missing if not asserted",
+      "note": "PayPal documents a partner-only 'show seller status' call that returns a country for onboarded sellers; whether it applies to a direct-merchant integration, and what 'country' means, was not established. Not implemented."
+    },
+    {
+      "input_name": "webhook notification",
+      "source": "CUSTOMER.DISPUTE.CREATED / UPDATED / RESOLVED",
+      "role": "TRIGGER_ONLY",
+      "provenance": "none: the payload yields no facts",
+      "mandatory": false,
+      "implemented": "IMPLEMENTED_INTERFACE_ONLY",
+      "reaches_engine_as": "nothing; a verified notification yields a request for a fresh Disputes API read",
+      "note": "Verification is an injected interface (PayPal's verify-webhook-signature); no live verifier exists; default fails closed."
+    },
+    {
+      "input_name": "Dispute Detail Custom report",
+      "source": "SFTP report for approved merchants",
+      "role": "SUPPLEMENTARY",
+      "provenance": "n/a",
+      "mandatory": false,
+      "implemented": "NOT_IMPLEMENTED",
+      "reaches_engine_as": "nothing",
+      "note": "Reconciliation only. Not a dependency of any assessment."
+    },
+    {
+      "input_name": "transaction_details_address",
+      "source": "none established",
+      "role": "UNKNOWN",
+      "provenance": "n/a",
+      "mandatory": false,
+      "implemented": "NOT_IMPLEMENTED",
+      "reaches_engine_as": "nothing",
+      "note": "The Orders shipping address is recorded as an observation but is not treated as the Transaction Details address."
+    },
+    {
+      "input_name": "funding_source",
+      "source": "none exposed on the capture resource",
+      "role": "UNKNOWN",
+      "provenance": "n/a",
+      "mandatory": false,
+      "implemented": "NOT_IMPLEMENTED",
+      "reaches_engine_as": "nothing",
+      "note": "Stays an open UNKNOWN in the engine."
+    }
+  ],
+  "normalization_tables": {
+    "claim_reason_table_v1": {
+      "MERCHANDISE_OR_SERVICE_NOT_RECEIVED": {
+        "delivery_gate_value": "ITEM_NOT_RECEIVED",
+        "established": true,
+        "basis": [
+          "https://developer.paypal.com/docs/disputes/webhooks",
+          "https://developer.paypal.com/docs/disputes/integration-guide/"
+        ],
+        "note": "PayPal describes the reason as the customer not receiving the merchandise or service."
+      },
+      "UNAUTHORISED": {
+        "delivery_gate_value": "UNAUTHORIZED_TRANSACTION",
+        "established": true,
+        "basis": [
+          "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_info",
+          "https://developer.paypal.com/docs/disputes/integration-guide/"
+        ],
+        "note": "PayPal describes the reason as the customer not authorizing the purchase."
+      },
+      "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED": {
+        "delivery_gate_value": "SIGNIFICANTLY_NOT_AS_DESCRIBED",
+        "established": false,
+        "basis": [
+          "https://developer.paypal.com/docs/disputes/integration-guide/"
+        ],
+        "note": "NOT applied: the value is listed but no PayPal description of it was retrieved, and 'not as described' vs the policy's 'significantly not as described' is not established by name alone. Set established=True only after a primary description is recorded."
+      }
+    },
+    "channel_route_table_v1": {
+      "INTERNAL": {
+        "delivery_gate_value": "PAYPAL_DISPUTE",
+        "established": true,
+        "basis": [
+          "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_channel",
+          "https://developer.paypal.com/disputes/overview#internal-disputes"
+        ],
+        "note": "PayPal documents INTERNAL as the customer contacting PayPal to file a dispute with the merchant."
+      },
+      "EXTERNAL": {
+        "delivery_gate_value": null,
+        "established": false,
+        "basis": [
+          "https://developer.paypal.com/disputes/overview#external-disputes"
+        ],
+        "note": "NOT applied: PayPal documents external disputes as including card chargebacks AND ACH returns, and the policy text retrieved does not establish Item Not Received handling for other routes such as bank reversals. Route stays unknown."
+      },
+      "ALERT": {
+        "delivery_gate_value": null,
+        "established": false,
+        "basis": [
+          "https://developer.paypal.com/disputes/overview#types-of-external-disputes"
+        ],
+        "note": "NOT applied: a pre-chargeback alert is a notification about a potential chargeback, not a filed dispute. Route stays unknown."
+      }
+    }
+  }
+}

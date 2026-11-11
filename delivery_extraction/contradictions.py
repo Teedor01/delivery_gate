@@ -16,7 +16,7 @@ class Contradiction:
     group_id: str
     fact: str
     entity_ref: Any
-    status: str                     
+    status: str                       
     needs_human_review: bool
     fact_ids: Tuple[str, ...]
     values: Tuple[Dict[str, Any], ...]
@@ -36,7 +36,7 @@ def _differs(fact: str, a: Any, b: Any) -> bool:
     if fact == "recipient_address":
         na, nb = _norm_addr(a), _norm_addr(b)
         common = set(na) & set(nb)
-        return bool(common) and any(na[k] != nb[k] for k in common)      
+        return bool(common) and any(na[k] != nb[k] for k in common)     
     if isinstance(a, str) and isinstance(b, str):
         return norm_text(a) != norm_text(b)
     return a != b

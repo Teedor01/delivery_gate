@@ -1,6 +1,3 @@
-"""Live LLM adapter (Anthropic Messages API). Isolated on purpose: this module never imports the policy engine, so the
-model call path cannot see rules, passages or assessments. Not exercised against the real API in the build environment (no
-network, no key); the request/response handling is tested through an injected transport."""
 from __future__ import annotations
 
 import hashlib

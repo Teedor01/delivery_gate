@@ -1,0 +1,72 @@
+{
+  "no_dispute": {
+    "original_transaction_value": {
+      "state": "OBSERVED",
+      "value": "1200.00",
+      "currency": "USD",
+      "source_observation": "fixture:paypal-capture:FXCAP0000000001#amount.value",
+      "reason": null,
+      "api_semantics_ref": "orders_v2.capture.amount=*",
+      "note": "The amount of this capture. Refunds are not reflected; the capture may be one of several on the order."
+    },
+    "disputed_amount": {
+      "state": "UNKNOWN",
+      "value": null,
+      "currency": null,
+      "source_observation": null,
+      "reason": "NO_DISPUTE_OBSERVED",
+      "api_semantics_ref": null,
+      "note": "No dispute exists or none has been read; the disputed amount is not assumed from the transaction value."
+    },
+    "potential_seller_exposure": {
+      "state": "UNKNOWN",
+      "value": null,
+      "currency": null,
+      "source_observation": null,
+      "reason": "NO_REVIEWED_POLICY_RULE_DEFINES_POTENTIAL_SELLER_EXPOSURE",
+      "api_semantics_ref": null,
+      "note": "Not derived from the original transaction value or from the disputed amount. Defining it needs a separately reviewed policy change."
+    },
+    "linkage": {},
+    "flags": []
+  },
+  "with_linked_partial_dispute": {
+    "original_transaction_value": {
+      "state": "OBSERVED",
+      "value": "1200.00",
+      "currency": "USD",
+      "source_observation": "fixture:paypal-capture:FXCAP0000000001#amount.value",
+      "reason": null,
+      "api_semantics_ref": "orders_v2.capture.amount=*",
+      "note": "The amount of this capture. Refunds are not reflected; the capture may be one of several on the order."
+    },
+    "disputed_amount": {
+      "state": "OBSERVED",
+      "value": "300.00",
+      "currency": "USD",
+      "source_observation": "fixture:paypal-dispute:PP-D-FX0001#dispute_amount.value",
+      "reason": null,
+      "api_semantics_ref": "disputes_v1.dispute.dispute_amount=*",
+      "note": "What the customer originally disputed; documented as possibly less than the original transaction's gross or net amount."
+    },
+    "potential_seller_exposure": {
+      "state": "UNKNOWN",
+      "value": null,
+      "currency": null,
+      "source_observation": null,
+      "reason": "NO_REVIEWED_POLICY_RULE_DEFINES_POTENTIAL_SELLER_EXPOSURE",
+      "api_semantics_ref": null,
+      "note": "Not derived from the original transaction value or from the disputed amount. Defining it needs a separately reviewed policy change."
+    },
+    "linkage": {
+      "capture_id": "FXCAP0000000001",
+      "dispute_id": "PP-D-FX0001",
+      "dispute_seller_transaction_ids": [
+        "FXCAP0000000001"
+      ],
+      "linked": true,
+      "basis": "IDENTIFIER_EQUALITY_ONLY: PayPal's docs do not state that a capture id and a dispute's seller_transaction_id share a namespace"
+    },
+    "flags": []
+  }
+}

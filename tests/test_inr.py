@@ -28,7 +28,7 @@ class INR(unittest.TestCase):
         a = assess(REG, S.inr_case(route="CARD_ISSUER_CHARGEBACK", funding="CARD"))
         self.assertEqual(a.protection_assessment, PA.NOT_COVERED)
         self.assertEqual(a.reason_codes, ("ROUTE_EXCLUDED",))
-        self.assertEqual(a.checks, ())                       
+        self.assertEqual(a.checks, ())                       # no requirement evaluation on an excluded route
         self.assertIn("SP.excl.inr_issuer", a.gate("inr.gate.route").passage_ids)
         self.assertIn("inr.gate.route", text(a))
 
@@ -61,6 +61,7 @@ class INR(unittest.TestCase):
         self.assertEqual(blocking_ids(a), ["inr.proof_of_delivery.recipient_address_matches"])
         self.assertEqual(a.check("inr.proof_of_delivery.recipient_address_matches").reason_code, "MISSING_FACT")
         self.assertIn("transaction_details_address", a.check("inr.proof_of_delivery.recipient_address_matches").detail)
+        # the merchant assertion alone is recorded as ASSERTED_ONLY, never as a derived match
         self.assertEqual(a.check("inr.ship_to_transaction_address").reason_code, "ASSERTED_ONLY")
 
     def test_08_conflicting_delivery_evidence(self):

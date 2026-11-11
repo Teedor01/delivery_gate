@@ -1,3 +1,4 @@
+"""Audit corrections 2, 4, 5: artifact fields vs PayPal sufficiency; conservative merchant assertions; strict addresses."""
 import json, unittest
 from tests.helpers import *
 
@@ -14,7 +15,7 @@ class ArtifactFieldsVsPayPalAcceptance(unittest.TestCase):
             self.assertEqual(c.paypal_acceptance, "NOT_ESTABLISHED", c.check_id)
             self.assertIn(TOKEN, c.does_not_establish, c.check_id)
             if c.status == ES.DEMONSTRATED:
-                self.assertTrue(c.establishes, c.check_id)        
+                self.assertTrue(c.establishes, c.check_id)         # a field-level statement, e.g. 'carrier_record contains ...'
         self.assertIn("not a finding that PayPal accepts", text(a))
 
     def test_the_token_is_only_ever_listed_under_does_not_establish(self):
@@ -65,13 +66,13 @@ class MerchantAssertionsStayConservative(unittest.TestCase):
 
     def test_assertion_is_not_equivalent_to_corroborated_evidence(self):
         a = assess(REG, S.inr_case())
-        self.assertEqual(a.check("inr.ship_to_transaction_address").corroboration, "CORROBORATED")      
+        self.assertEqual(a.check("inr.ship_to_transaction_address").corroboration, "CORROBORATED")      # derived from the carrier address
         self.assertEqual(a.check("inr.proof_of_delivery.record").corroboration, "CORROBORATED")
-        self.assertEqual(a.check("inr.timely_response").corroboration, "MERCHANT_ASSERTED_ONLY")       
+        self.assertEqual(a.check("inr.timely_response").corroboration, "MERCHANT_ASSERTED_ONLY")        # merchant-supplied status
         self.assertEqual(a.uncorroborated_requirements, ("inr.timely_response",))
 
     def test_assertion_cannot_override_a_contradicting_carrier_address(self):
-        c = S.inr_case().with_changes(set_evidence=[S.ev("recipient_address", S.WRONG_ADDR)])   
+        c = S.inr_case().with_changes(set_evidence=[S.ev("recipient_address", S.WRONG_ADDR)])   # assertion still says True
         ship = assess(REG, c).check("inr.ship_to_transaction_address")
         self.assertEqual((ship.status, ship.reason_code), (ES.CONTRADICTED, "ADDRESS_MISMATCH"))
 
@@ -92,7 +93,7 @@ class AddressMatchingStaysStrict(unittest.TestCase):
         self.assertEqual(a.check("inr.proof_of_delivery.recipient_address_matches").status, ES.DEMONSTRATED)
 
     def test_st_and_street_are_not_silently_equated(self):
-        a = self.with_line1("1 Market Street")                       
+        a = self.with_line1("1 Market Street")                         # TD address says "1 Market St"
         m = a.check("inr.proof_of_delivery.recipient_address_matches")
         self.assertEqual((m.status, m.reason_code), (ES.CONTRADICTED, "ADDRESS_MISMATCH"))
         self.assertTrue(m.needs_human_review and a.needs_human_review)

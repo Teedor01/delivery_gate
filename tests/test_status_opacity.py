@@ -1,3 +1,4 @@
+"""Audit correction 1: PARTIALLY_ELIGIBLE (and every other API status token) is an opaque observed value."""
 import json, shutil, tempfile, unittest
 from pathlib import Path
 from delivery_gate.engine import ALL_EVALUATOR_NAMES
@@ -31,7 +32,7 @@ class StatusIsOpaque(unittest.TestCase):
     def test_every_token_produces_the_identical_assessment(self):
         base = self.normalised(self.TOKENS[0])
         for t in self.TOKENS[1:]:
-            self.assertEqual(self.normalised(t), base, t)     
+            self.assertEqual(self.normalised(t), base, t)      # the engine attaches no meaning to any token
 
     def test_no_token_satisfies_or_fails_the_policy_condition(self):
         for t in self.TOKENS:
@@ -53,7 +54,7 @@ class StatusIsOpaque(unittest.TestCase):
             registry_with_condition(lambda c: c["mapping"].update(satisfied_values=["PARTIALLY_ELIGIBLE"]))
         with self.assertRaises(RegistryError):
             registry_with_condition(lambda c: c["mapping"].update(unsatisfied_values=["NOT_ELIGIBLE"]))
-        with self.assertRaises(RegistryError):                     
+        with self.assertRaises(RegistryError):                       # established but no primary-doc passage
             registry_with_condition(lambda c: c["mapping"].update(established=True, satisfied_values=["ELIGIBLE"]))
         with self.assertRaises(RegistryError):
             registry_with_condition(lambda c: c.update(status_semantics="ESTABLISHED"))
@@ -65,7 +66,9 @@ class StatusIsOpaque(unittest.TestCase):
             unsatisfied_values=["NOT_ELIGIBLE"]))
         self.assertEqual(assess(reg, S.unauth_case(status="ELIGIBLE")).condition(COND)["state"], "SATISFIED")
         self.assertEqual(assess(reg, S.unauth_case(status="NOT_ELIGIBLE")).protection_assessment, PA.NOT_COVERED)
+        # a token the rule does not list stays unresolved even then
         self.assertEqual(assess(reg, S.unauth_case(status="PARTIALLY_ELIGIBLE")).condition(COND)["state"], "UNRESOLVED")
+        # the shipped registry has no established mapping
         self.assertFalse(REG.rules["us.sp.unauthorized"].raw["policy_conditions"][0]["mapping"]["established"])
 
 

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Gate policy rule (Phase 1)",
+  "description": "A versioned rule document. Rules are data; evaluators are named and implemented in the engine. Status may be UNREVIEWED or REVIEWED only, never VERIFIED, and REVIEWED requires raw-byte source hashes and reviewer sign-off.",
+  "type": "object",
+  "required": [
+    "rule_id",
+    "version",
+    "status",
+    "policy",
+    "jurisdiction",
+    "claim_category",
+    "mode",
+    "source_ids",
+    "policy_effect",
+    "eligibility_determination",
+    "gates",
+    "policy_conditions",
+    "exclusions",
+    "checks",
+    "open_requirements",
+    "not_modeled",
+    "unknowns"
+  ],
+  "properties": {
+    "rule_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "UNREVIEWED",
+        "REVIEWED"
+      ]
+    },
+    "status_note": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Policy jurisdiction. The engine returns UNSUPPORTED_JURISDICTION / UNKNOWN when the merchant account does not match or is not supplied."
+    },
+    "claim_category": {
+      "enum": [
+        "ITEM_NOT_RECEIVED",
+        "UNAUTHORIZED_TRANSACTION",
+        "SIGNIFICANTLY_NOT_AS_DESCRIBED"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "EVALUATE",
+        "NOT_COVERED"
+      ]
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Resolved against policy/sources.json (url, title, retrieval date, source_hash)."
+    },
+    "policy_effect": {
+      "type": "object",
+      "required": [
+        "value",
+        "passage_ids"
+      ]
+    },
+    "eligibility_determination": {
+      "type": "object",
+      "required": [
+        "value",
+        "passage_ids"
+      ]
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate_id",
+          "type",
+          "kind",
+          "passage_ids"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "jurisdiction",
+              "route",
+              "goods_scope"
+            ]
+          }
+        }
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "exclusion_id",
+          "kind",
+          "passage_ids"
+        ]
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "kind",
+          "description",
+          "evaluator",
+          "params",
+          "passage_ids",
+          "establishes",
+          "sufficiency_stated_by_policy",
+          "does_not_establish"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "EXPLICIT_REQUIREMENT",
+              "EXPLICIT_CONDITION",
+              "EXCLUSION",
+              "INTERPRETATION"
+            ]
+          },
+          "interpretation": {
+            "type": "boolean"
+          },
+          "interpretation_note": {
+            "type": "string"
+          },
+          "establishes": {
+            "type": "string",
+            "description": "Field-level statement of what DEMONSTRATED means, e.g. 'carrier_record contains a tracking number'."
+          },
+          "sufficiency_stated_by_policy": {
+            "type": "boolean",
+            "description": "True only if a cited passage explicitly says the artifact is sufficient."
+          },
+          "does_not_establish": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "open_requirements": {
+      "type": "array",
+      "description": "Requirements the engine cannot evaluate; reported as open items, never as results."
+    },
+    "not_modeled": {
+      "type": "array",
+      "description": "Source-mentioned or rumoured items deliberately NOT modeled, with the reason.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "reason",
+          "passage_ids"
+        ]
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "description": "Explicit unknowns carried into every assessment.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "passage_ids"
+        ]
+      }
+    },
+    "exposure_model": {
+      "type": "object",
+      "description": "SNAD only: floor, documented cost types, unbounded total."
+    },
+    "policy_conditions": {
+      "type": "array",
+      "description": "Conditions on opaque PayPal values. Status values may appear in rule data ONLY when mapping.established is true and establishing_passage_ids cite primary documentation.",
+      "items": {
+        "type": "object",
+        "required": [
+          "condition_id",
+          "kind",
+          "fact",
+          "description",
+          "passage_ids",
+          "status_semantics",
+          "mapping"
+        ]
+      }
+    }
+  }
+}

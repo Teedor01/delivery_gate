@@ -1,0 +1,478 @@
+{
+  "rows": [
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_amount=*",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_amount",
+      "value": "*",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The amount in the transaction that the customer originally disputed. Customers can dispute only part of a payment, so it may differ from the total gross or net amount of the original transaction.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/customer-disputes/v1/definitions/dispute_search"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_channel=ALERT",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_channel",
+      "value": "ALERT",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "A pre-chargeback alert when the customer contacts their card issuer to request a refund.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_channel",
+        "https://developer.paypal.com/disputes/overview#types-of-external-disputes"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_channel=EXTERNAL",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_channel",
+      "value": "EXTERNAL",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The customer contacts their card issuer or bank to request a refund. PayPal's overview says external disputes include both card chargebacks and ACH returns (bank reversals).",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_channel",
+        "https://developer.paypal.com/disputes/overview#external-disputes"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_channel=INTERNAL",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_channel",
+      "value": "INTERNAL",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The customer contacts PayPal to file a dispute with the merchant (PayPal's overview: filed through the PayPal Resolution Center).",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_channel",
+        "https://developer.paypal.com/disputes/overview#internal-disputes"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_life_cycle_stage=ARBITRATION",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_life_cycle_stage",
+      "value": "ARBITRATION",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/customer-disputes/v1/definitions/dispute_search"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed stage; no per-value description retrieved. A lifecycle stage is not a dispute route.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_life_cycle_stage=CHARGEBACK",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_life_cycle_stage",
+      "value": "CHARGEBACK",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/customer-disputes/v1/definitions/dispute_search"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed stage; no per-value description retrieved. A lifecycle stage is not a dispute route.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_life_cycle_stage=INQUIRY",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_life_cycle_stage",
+      "value": "INQUIRY",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The customer and merchant try to resolve the dispute without escalation to PayPal (a 20-day period); PayPal's docs say this occurs only for the INTERNAL channel.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/disputes/webhooks",
+        "https://developer.paypal.com/disputes/overview#dispute-lifecycle-and-stages"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.dispute_life_cycle_stage=PRE_ARBITRATION",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.dispute_life_cycle_stage",
+      "value": "PRE_ARBITRATION",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/customer-disputes/v1/definitions/dispute_search"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed stage; no per-value description retrieved. A lifecycle stage is not a dispute route.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=CANCELED_RECURRING_BILLING",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "CANCELED_RECURRING_BILLING",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=CREDIT_NOT_PROCESSED",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "CREDIT_NOT_PROCESSED",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=DUPLICATE_TRANSACTION",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "DUPLICATE_TRANSACTION",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=INCORRECT_AMOUNT",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "INCORRECT_AMOUNT",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/disputes/integration-guide/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "The value is listed in PayPal's Disputes API docs but no PayPal description of it was retrieved; it is not normalised from its name.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The customer did not receive the merchandise or service.",
+      "described_claim_types": [
+        "customer did not receive an item"
+      ],
+      "sources": [
+        "https://developer.paypal.com/docs/disputes/webhooks",
+        "https://developer.paypal.com/docs/disputes/integration-guide/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=OTHER",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "OTHER",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=PAYMENT_BY_OTHER_MEANS",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "PAYMENT_BY_OTHER_MEANS",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=PROBLEM_WITH_REMITTANCE",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "PROBLEM_WITH_REMITTANCE",
+      "meaning_status": "NAME_ONLY",
+      "documented_meaning": null,
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Listed value; no primary description retrieved; out of Delivery Gate's claim scope.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "disputes_v1.dispute.reason=UNAUTHORISED",
+      "api": "PayPal Disputes v1",
+      "field": "dispute.reason",
+      "value": "UNAUTHORISED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The customer did not authorize the purchase of the merchandise or service.",
+      "described_claim_types": [
+        "account holder did not authorize the payment"
+      ],
+      "sources": [
+        "https://developer.paypal.com/docs/api/customer-disputes/v1/#dispute_info",
+        "https://developer.paypal.com/docs/disputes/integration-guide/"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.amount=*",
+      "api": "PayPal Orders v2",
+      "field": "capture.amount",
+      "value": "*",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The total order amount (with an optional breakdown) for the capture; must be a positive number. It is the capture's amount, not a disputed amount.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#amount"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.seller_protection.status=ELIGIBLE",
+      "api": "PayPal Orders v2",
+      "field": "capture.seller_protection.status",
+      "value": "ELIGIBLE",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "PayPal states the seller's PayPal balance remains intact if the customer claims they did not receive an item OR the account holder claims they did not authorize the payment.",
+      "described_claim_types": [
+        "customer did not receive an item",
+        "account holder did not authorize the payment"
+      ],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#seller_protection.status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "The API describes the effect on the seller's PayPal balance for the claim types named. That is not shown to be the same as the 'eligible'/'partially eligible' mark on the Transaction Details page that the legal policy refers to, no PayPal document links the two, and the policy says PayPal decides at dispute time. A differently-scoped description of a similarly named value exists on another PayPal surface (see CROSS_SURFACE_NOTES), so equivalence across surfaces cannot be assumed.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.seller_protection.status=NOT_ELIGIBLE",
+      "api": "PayPal Orders v2",
+      "field": "capture.seller_protection.status",
+      "value": "NOT_ELIGIBLE",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "PayPal states the transaction is not eligible for seller protection.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#seller_protection.status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "The API describes the effect on the seller's PayPal balance for the claim types named. That is not shown to be the same as the 'eligible'/'partially eligible' mark on the Transaction Details page that the legal policy refers to, no PayPal document links the two, and the policy says PayPal decides at dispute time. A differently-scoped description of a similarly named value exists on another PayPal surface (see CROSS_SURFACE_NOTES), so equivalence across surfaces cannot be assumed.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.seller_protection.status=PARTIALLY_ELIGIBLE",
+      "api": "PayPal Orders v2",
+      "field": "capture.seller_protection.status",
+      "value": "PARTIALLY_ELIGIBLE",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "PayPal states the seller's PayPal balance remains intact if the customer claims they did not receive an item (the unauthorized-payment case is not described).",
+      "described_claim_types": [
+        "customer did not receive an item"
+      ],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#seller_protection.status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "The API describes the effect on the seller's PayPal balance for the claim types named. That is not shown to be the same as the 'eligible'/'partially eligible' mark on the Transaction Details page that the legal policy refers to, no PayPal document links the two, and the policy says PayPal decides at dispute time. A differently-scoped description of a similarly named value exists on another PayPal surface (see CROSS_SURFACE_NOTES), so equivalence across surfaces cannot be assumed.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=COMPLETED",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "COMPLETED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The funds for this captured payment were credited to the payee's PayPal account.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=DECLINED",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "DECLINED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The funds could not be captured.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=FAILED",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "FAILED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "There was an error while capturing the payment.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=PARTIALLY_REFUNDED",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "PARTIALLY_REFUNDED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "An amount less than the captured payment's amount was refunded to the payer.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=PENDING",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "PENDING",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The funds were not yet credited to the payee's PayPal account (see status_details).",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status=REFUNDED",
+      "api": "PayPal Orders v2",
+      "field": "capture.status",
+      "value": "REFUNDED",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "An amount greater than or equal to the captured payment's amount was refunded to the payer.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status_details.reason=BUYER_COMPLAINT",
+      "api": "PayPal Orders v2",
+      "field": "capture.status_details.reason",
+      "value": "BUYER_COMPLAINT",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The payer initiated a dispute for this captured payment with PayPal.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status_details.reason"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Documented only for captures whose status is PENDING or DENIED. Not read as a Delivery Gate dispute route.",
+      "retrieved": "2026-11-01"
+    },
+    {
+      "semantics_id": "orders_v2.capture.status_details.reason=CHARGEBACK",
+      "api": "PayPal Orders v2",
+      "field": "capture.status_details.reason",
+      "value": "CHARGEBACK",
+      "meaning_status": "DOCUMENTED",
+      "documented_meaning": "The captured funds were reversed in response to the payer disputing this captured payment with the issuer of the financial instrument used to pay.",
+      "described_claim_types": [],
+      "sources": [
+        "https://developer.paypal.com/api/orders/v2/definitions/capture#status_details.reason"
+      ],
+      "legal_policy_equivalence": "NOT_ESTABLISHED",
+      "equivalence_note": "Documented only for captures whose status is PENDING or DENIED. Not read as a Delivery Gate dispute route.",
+      "retrieved": "2026-11-01"
+    }
+  ],
+  "cross_surface_notes": [
+    {
+      "note_id": "report.partially_eligible_unauth_only",
+      "surface": "Dispute Detail Custom report (SFTP, approved merchants)",
+      "source": "https://developer.paypal.com/docs/reports/sftp-reports/dispute-detail-custom/#case-fields",
+      "says": "Its 'Seller Protection' column defines 'Partially Eligible Unauth Only' as protection for Unauthorized Payment only, 'Eligible' as Unauthorized Payment and Item Not Received, and 'Ineligible' as not protected.",
+      "bearing": "Compare with the Orders v2 description of PARTIALLY_ELIGIBLE (item-not-received only). Different surfaces, different scope: the token/label equivalence is not established and Delivery Gate does not assume it."
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+"""Source roles: where each Delivery Gate input may come from, how it is trusted, and what is built. Data only; the engine never reads it.
+
+An input with no established source stays UNKNOWN (missing) rather than being filled from a weaker source.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
@@ -8,10 +12,10 @@ from typing import Any, Dict, Tuple
 class SourceRole:
     input_name: str
     source: str
-    role: str                 
-    provenance: str           
-    mandatory: bool        
-    implemented: str         
+    role: str                 # PRIMARY | TRIGGER_ONLY | SUPPLEMENTARY | ASSERTED | UNKNOWN
+    provenance: str           # the provenance a fact from this source carries
+    mandatory: bool           # is the build dependent on it
+    implemented: str          # IMPLEMENTED_FIXTURES | IMPLEMENTED_INTERFACE_ONLY | NOT_IMPLEMENTED
     reaches_engine_as: str
     note: str
 

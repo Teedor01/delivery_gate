@@ -161,7 +161,7 @@ def _validate_value(name: str, value: Any) -> Any:
             raise ValueError(f"{name} must not be negative")
         return str(d)
     if name in DATE_NAMES:
-        date.fromisoformat(str(value))
+        date.fromisoformat(str(value))  # validation only; no date arithmetic anywhere in this package
         return str(value)
     if name in ADDRESS_NAMES:
         if not isinstance(value, dict) or not set(value) <= set(ADDRESS_KEYS):
@@ -210,7 +210,7 @@ class Provenance:
         d = {"source_type": self.source_type.value, "source_ref": self.source_ref,
              "status": self.status.value, "confidence": self.confidence,
              "timestamp": self.timestamp, "text_span": self.text_span}
-        if self.source_authenticity is not None:         
+        if self.source_authenticity is not None:          
             d["source_authenticity"] = self.source_authenticity.value
         return d
 

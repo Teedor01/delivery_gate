@@ -1,3 +1,4 @@
+"""Mutation checks for the Phase 3 corrections. Each broken variant must trip at least one property that the real code satisfies."""
 import copy, json, types, unittest
 from dataclasses import replace
 from unittest import mock

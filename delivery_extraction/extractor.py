@@ -10,7 +10,7 @@ from delivery_extraction.schema import Artifact
 @dataclass(frozen=True)
 class RawExtraction:
     text: str
-    extractor_kind: str                 
+    extractor_kind: str                  
     model: Optional[str] = None
     prompt_sha256: Optional[str] = None
     request_sha256: Optional[str] = None

@@ -1,3 +1,5 @@
+"""Mutation checks for the PayPal adapter. A property battery must pass on the real code and FAIL on each deliberately broken variant.
+A battery that cannot fail proves nothing."""
 import copy, hashlib, itertools, json, unittest
 from dataclasses import replace
 from unittest import mock
@@ -5,7 +7,7 @@ from paypal_adapter import adapter, handoff as hmod
 from paypal_adapter.inventory import CAPTURE_DEF, Semantics
 from tests.paypal_helpers import *
 
-EXPECTED_FACTS = {"paypal_seller_protection_status", "currency"}     
+EXPECTED_FACTS = {"paypal_seller_protection_status", "currency"}      # literal, independent of the module under test
 CAP0 = "purchase_units[0].payments.captures[0]"
 ORIG_OBSERVE_ORDER = adapter.observe_order
 ORIG_EXTRACT_SP = adapter._extract_seller_protection
@@ -15,7 +17,7 @@ ORIG_PREPARE = adapter._prepare
 ORIG_TO_CASE = hmod.to_case
 
 
-def _canon_sha(resp):                                                                      
+def _canon_sha(resp):                                                                      # computed independently of adapter.canonical
     return hashlib.sha256(json.dumps(resp, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 
 
@@ -25,7 +27,7 @@ def violations():
     def check(name, fn):
         try:
             msg = fn()
-        except Exception as e:                                                            
+        except Exception as e:                                                             # a crash on a safe input is itself a violation
             v.append(f"{name}: raised {type(e).__name__}: {e}")
             return
         if msg:
@@ -37,7 +39,7 @@ def violations():
             got = handoff(r).case.fact("paypal_seller_protection_status")
             if got is None or got.value != raw:
                 return f"{n}: token {raw!r} was not passed through verbatim (got {None if got is None else got.value!r})"
-        r = with_status(response("01_normal"), "eligible")                                 
+        r = with_status(response("01_normal"), "eligible")                                  # lower-case: no case folding allowed
         got = handoff(r).case.fact("paypal_seller_protection_status")
         if got is None or got.value != "eligible":
             return "token was altered"
@@ -126,36 +128,36 @@ def violations():
 
 
 # ---- the broken variants ---------------------------------------------------------------------------------------------------
-def _m_status_mapped(raw):                         
+def _m_status_mapped(raw):                         # the adapter decides what the token MEANS
     if not isinstance(raw, str) or not raw:
         return None, None, ("TYPE", "x")
     return {"ELIGIBLE": "SATISFIED", "NOT_ELIGIBLE": "UNSATISFIED"}.get(raw, raw), "DOCUMENTED_TOKEN", None
 
 
-def _m_status_upper(raw):                          
+def _m_status_upper(raw):                          # the adapter normalises the token
     if not isinstance(raw, str) or not raw:
         return None, None, ("TYPE", "x")
     return raw.upper(), "DOCUMENTED_TOKEN", None
 
 
-def _m_status_drop_unknown(raw):                  
+def _m_status_drop_unknown(raw):                   # an undocumented token silently disappears
     if not isinstance(raw, str) or raw not in ("ELIGIBLE", "PARTIALLY_ELIGIBLE", "NOT_ELIGIBLE"):
         return None, None, ("UNDOCUMENTED_ENUM_VALUE", "dropped")
     return raw, "DOCUMENTED_TOKEN", None
 
 
-def _m_categories_filtered(raw):                  
+def _m_categories_filtered(raw):                   # unknown categories filtered out without a trace
     return sorted(x for x in raw if x in ("ITEM_NOT_RECEIVED", "UNAUTHORIZED_TRANSACTION")), None
 
 
-def _m_default_sp(ctx, cap):                       
+def _m_default_sp(ctx, cap):                       # a missing seller_protection becomes NOT_ELIGIBLE
     if "seller_protection" not in cap:
         ctx.obs.append(ORIG_MAKE_OBS(ctx, "seller_protection.status", None, "NOT_ELIGIBLE", "NONE", Semantics.OBSERVED_AND_DOCUMENTED, CAPTURE_DEF, "DOCUMENTED_TOKEN"))
         return
     return ORIG_EXTRACT_SP(ctx, cap)
 
 
-def _m_default_amount(ctx, parent, local, doc_ref, semantics):     
+def _m_default_amount(ctx, parent, local, doc_ref, semantics):      # a missing amount becomes 0.01 USD
     return ORIG_EXTRACT_MONEY(ctx, parent if parent is not None else {"value": "0.01", "currency_code": "USD"}, local, doc_ref, semantics)
 
 
@@ -175,18 +177,18 @@ def _m_nondeterministic(response_, origin, observed_at):
     return ORIG_PREPARE(response_, origin, observed_at) + str(next(_counter))
 
 
-def _m_lenient_observe(response_, *, origin, observed_at=None):    
+def _m_lenient_observe(response_, *, origin, observed_at=None):    # swallows malformed input
     try:
         return ORIG_OBSERVE_ORDER(response_, origin=origin, observed_at=observed_at)
     except adapter.MalformedPayPalResponse:
         return adapter.OrderObservation("UNKNOWN", origin, observed_at, "", ())
 
 
-def _m_clock(response_, *, origin, observed_at=None):             
+def _m_clock(response_, *, origin, observed_at=None):              # stamps an observation time nobody supplied
     return ORIG_OBSERVE_ORDER(response_, origin=origin, observed_at=observed_at or "2026-01-01T00:00:00Z")
 
 
-def _m_to_case_default_status(cap, *, case_id=None):               
+def _m_to_case_default_status(cap, *, case_id=None):               # hands over a defaulted status when PayPal returned none
     res = ORIG_TO_CASE(cap, case_id=case_id)
     if res.case.fact("paypal_seller_protection_status") is None:
         f = TransactionFact("paypal_seller_protection_status", "NOT_ELIGIBLE", Provenance(SourceType.PAYPAL_API, "default", ProvStatus.SYSTEM_RECORD))
@@ -243,7 +245,7 @@ class Battery(unittest.TestCase):
         mod, attr, bad = MUTATIONS["M15 handoff plan turns the status token into a PROTECTED fact"]
         with mock.patch.object(hmod, attr, bad):
             with self.assertRaises(ValueError):
-                handoff(response("01_normal"))                                         
+                handoff(response("01_normal"))                                         # TransactionFact refuses a 'protected' name outright
 
 
 if __name__ == "__main__":

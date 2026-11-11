@@ -35,7 +35,7 @@ class RegistryRules(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry_with(lambda d: d.update(status="VERIFIED"))
         with self.assertRaises(RegistryError):
-            registry_with(lambda d: d.update(status="REVIEWED"))      
+            registry_with(lambda d: d.update(status="REVIEWED"))       # no raw-byte hash, no reviewer
 
     def test_registry_rejects_bad_rules(self):
         with self.assertRaises(RegistryError):
@@ -47,7 +47,7 @@ class RegistryRules(unittest.TestCase):
         with self.assertRaises(RegistryError):
             registry_with(lambda d: d["checks"][0].pop("interpretation_note"))
         with self.assertRaises(RegistryError):
-            registry_with(lambda d: d["checks"][1].update(check_id="route")) 
+            registry_with(lambda d: d["checks"][1].update(check_id="route"))   # collides with a fact name
 
 
 class Layers(unittest.TestCase):
@@ -209,7 +209,7 @@ class Guardrails(unittest.TestCase):
         for name, t in self.src().items():
             self.assertNotIn("PARTIALLY_ELIGIBLE", t, name)
             self.assertNotIn("NOT_ELIGIBLE", t, name)
-        for p in (ROOT / "policy" / "rules").glob("*.json"):       
+        for p in (ROOT / "policy" / "rules").glob("*.json"):       # tokens may not appear in rule data at all in Phase 1
             raw = p.read_text()
             self.assertNotIn("PARTIALLY_ELIGIBLE", raw, p.name)
             self.assertNotIn("NOT_ELIGIBLE", raw, p.name)

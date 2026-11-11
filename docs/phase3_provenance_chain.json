@@ -1,0 +1,77 @@
+{
+  "1_paypal_response_field": "purchase_units[0].payments.captures[0].seller_protection.status",
+  "1_raw_response_sha256": "c0f6bbeb0aed21a30feddb52de7d62c85cf23f66b69a800f2fc5ea2714acafbb",
+  "2_observation": {
+    "observation_id": "fixture:paypal-capture:FXCAP0000000001#seller_protection.status",
+    "source": "PAYPAL_API",
+    "origin": "FIXTURE",
+    "api": "PayPal Orders v2",
+    "doc_ref": "https://developer.paypal.com/api/orders/v2/definitions/capture",
+    "resource_ref": "fixture:paypal-capture:FXCAP0000000001",
+    "field_path": "purchase_units[0].payments.captures[0].seller_protection.status",
+    "local_path": "seller_protection.status",
+    "raw_value": "ELIGIBLE",
+    "normalized_value": "ELIGIBLE",
+    "normalization": "NONE_OPAQUE_TOKEN",
+    "semantics": "OBSERVED_AND_DOCUMENTED",
+    "enum_state": "DOCUMENTED_TOKEN",
+    "observed_at": null,
+    "response_sha256": "c0f6bbeb0aed21a30feddb52de7d62c85cf23f66b69a800f2fc5ea2714acafbb",
+    "api_semantics_ref": "orders_v2.capture.seller_protection.status=ELIGIBLE"
+  },
+  "2b_api_semantics (what PayPal documents; NOT a policy mapping)": {
+    "semantics_id": "orders_v2.capture.seller_protection.status=ELIGIBLE",
+    "api": "PayPal Orders v2",
+    "field": "capture.seller_protection.status",
+    "value": "ELIGIBLE",
+    "meaning_status": "DOCUMENTED",
+    "documented_meaning": "PayPal states the seller's PayPal balance remains intact if the customer claims they did not receive an item OR the account holder claims they did not authorize the payment.",
+    "described_claim_types": [
+      "customer did not receive an item",
+      "account holder did not authorize the payment"
+    ],
+    "sources": [
+      "https://developer.paypal.com/api/orders/v2/definitions/capture#seller_protection.status"
+    ],
+    "legal_policy_equivalence": "NOT_ESTABLISHED",
+    "equivalence_note": "The API describes the effect on the seller's PayPal balance for the claim types named. That is not shown to be the same as the 'eligible'/'partially eligible' mark on the Transaction Details page that the legal policy refers to, no PayPal document links the two, and the policy says PayPal decides at dispute time. A differently-scoped description of a similarly named value exists on another PayPal surface (see CROSS_SURFACE_NOTES), so equivalence across surfaces cannot be assumed.",
+    "retrieved": "2026-11-01"
+  },
+  "3_delivery_gate_fact": {
+    "name": "paypal_seller_protection_status",
+    "value": "ELIGIBLE",
+    "provenance": {
+      "source_type": "PAYPAL_API",
+      "source_ref": "fixture:paypal-capture:FXCAP0000000001#seller_protection.status",
+      "status": "SYSTEM_RECORD",
+      "confidence": null,
+      "timestamp": null,
+      "text_span": null
+    }
+  },
+  "4_engine_consumer": {
+    "observed_input": {
+      "state": "SUPPLIED",
+      "value": "ELIGIBLE",
+      "status_semantics": "UNKNOWN"
+    },
+    "policy_condition": {
+      "condition_id": "unauth.condition.paypal_mark",
+      "kind": "EXPLICIT_CONDITION",
+      "description": "The policy requires the payment to be marked 'eligible' or 'partially eligible' on the Transaction Details page.",
+      "observation": "PAYPAL_STATUS_OBSERVED",
+      "observed_value": "ELIGIBLE",
+      "status_semantics": "UNKNOWN",
+      "POLICY_STATUS_MAPPING": "UNKNOWN",
+      "state": "UNRESOLVED",
+      "passage_ids": [
+        "SP.unauth.marked"
+      ],
+      "mapping_note": "The API status field is stored as an opaque PayPal value. No primary document retrieved establishes that it equals the Transaction Details mark named by the policy, so no status value satisfies or fails this condition."
+    },
+    "protection_assessment": "UNKNOWN",
+    "reason_codes": [
+      "POLICY_STATUS_MAPPING_UNKNOWN"
+    ]
+  }
+}

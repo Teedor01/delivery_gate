@@ -1,8 +1,8 @@
 {
  "_note": "SHA-256 of the Phase 1 engine, registry, policy and schema files exactly as approved in the Phase 2 zip. A change to any of them needs a separately reviewed policy change; update this file only as part of that review.",
  "files": {
-  "delivery_gate/engine.py": "cfa3fe5cb1309e8d96db266c32954a145abab502f5f6e6c7ebc13a12d0663c46",
-  "delivery_gate/registry.py": "b07f3693955ed3e1df7fb230bacd113a0c81a30554e4c2daae051273ae61f4dc",
+  "delivery_gate/engine.py": "856427e98258fd65a269cf0dbe90cf93872cd6b36521756e832d1b5ff4dc7f49",
+  "delivery_gate/registry.py": "4c056c017c6553bb6a420a792b4b53b2468d150e9967b2d28878f452991daafc",
   "policy/passages.json": "68b63bbeaa649376c62f8e312dc191d4935b844962212caa73f29b7f85e8822e",
   "policy/rules/us.sp.inr.json": "605c3e1bba0665c0a51b730dff73aba0370a6fef1e532f57b7126ff4b6769bda",
   "policy/rules/us.sp.snad.json": "a49baa96ca8b2baf8788e76eca6150b5c3e766377021930c07c600f9f275f00e",
@@ -11,5 +11,19 @@
   "schemas/assessment.schema.json": "c060bba78c0c7e9d30239289a518dd02786162e43a952d9654c0926e1930beb2",
   "schemas/extraction.schema.json": "32e707eed2a3a021630dbc48919e1fc1751a3c6d84c49ef5f21b4d02574d4d49",
   "schemas/rule.schema.json": "e0668297f41b6d0e8c9691ac38dd9563445bb9de8c0d078da1a29ad3179c4993"
+ },
+ "_baseline_maintenance": {
+  "date": "2026-11-11",
+  "kind": "Baseline maintenance (comments/whitespace only). NOT a policy-engine change.",
+  "files_updated": [
+   "delivery_gate/engine.py",
+   "delivery_gate/registry.py"
+  ],
+  "previous_sha256": {
+   "delivery_gate/engine.py": "cfa3fe5cb1309e8d96db266c32954a145abab502f5f6e6c7ebc13a12d0663c46",
+   "delivery_gate/registry.py": "b07f3693955ed3e1df7fb230bacd113a0c81a30554e4c2daae051273ae61f4dc"
+  },
+  "evidence": "For both files the Python token stream (comments and whitespace excluded) and the AST are identical to every committed version from the initial commit onward; differences are trailing-whitespace runs only. The originally approved Phase 2 bytes are not present in this repository's history, so byte equality with them could not be re-established. Full audit: PHASE5_REPORT.md.",
+  "policy_rules_passages_sources_and_schemas": "unchanged; still match their original approved hashes"
  }
 }

@@ -1,3 +1,13 @@
+"""PayPal observation adapter (Orders v2 capture). Pure observation: it records WHAT PayPal returned and WHERE, nothing about policy.
+
+Rules enforced here (each has a test and at least one mutation check):
+  * every value keeps its raw form, field path, documentation reference, response hash and observation time (if the caller supplied one);
+  * a missing field is recorded as ABSENT and never receives a default;
+  * an unknown enum token is preserved exactly and flagged; it is never normalised into a meaning;
+  * malformed structure raises MalformedPayPalResponse and yields no partial output;
+  * output is a pure function of the input: nothing is generated (no clock, no random ids), so it is deterministic.
+This module imports nothing from delivery_gate.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -14,7 +24,7 @@ from .inventory import (CAPTURE_DEF, SP_DEF, ORDERS_SPEC, DOCUMENTED_CAPTURE_STA
 ORIGINS = ("FIXTURE", "SANDBOX", "PRODUCTION")
 API_NAME = "PayPal Orders v2"
 SOURCE = "PAYPAL_API"
-AMOUNT_RE = re.compile(r"^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$")      
+AMOUNT_RE = re.compile(r"^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$")      # the pattern PayPal documents for money.value
 CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 ADDRESS_KEY_MAP = {"address_line_1": "line1", "address_line_2": "line2", "admin_area_2": "city", "admin_area_1": "region",
                    "postal_code": "postal_code", "country_code": "country"}
@@ -39,20 +49,20 @@ def sha256_hex(s: str) -> str:
 class Observation:
     observation_id: str
     source: str
-    origin: str                 
+    origin: str                 # FIXTURE | SANDBOX | PRODUCTION: a fixture is never presented as a live response
     api: str
     doc_ref: str
     resource_ref: str
-    field_path: str            
-    local_path: str          
+    field_path: str             # full path inside the response
+    local_path: str             # path relative to the capture
     raw_value: Any
-    normalized_value: Any      
+    normalized_value: Any       # None when no deterministic normalisation exists or the raw value is not usable
     normalization: str
-    semantics: str              
-    enum_state: Optional[str]   
-    observed_at: Optional[str] 
+    semantics: str              # Semantics value from the inventory
+    enum_state: Optional[str]   # DOCUMENTED_TOKEN | UNDOCUMENTED_TOKEN for enum fields
+    observed_at: Optional[str]  # supplied by the caller from the actual retrieval; never generated here
     response_sha256: str
-    api_semantics_ref: Optional[str] = None   
+    api_semantics_ref: Optional[str] = None   # id of the documented-meaning row in api_semantics (what PayPal says it means); NOT a policy mapping
 
     def to_dict(self) -> Dict[str, Any]:
         return dict(self.__dict__)
@@ -184,7 +194,7 @@ class _Ctx:
     resource_ref: str
     response_sha: str
     observed_at: Optional[str]
-    base: str                                  
+    base: str                                  # path of the resource inside the response
     obs: List[Observation]
     absent: List[Absence]
     anomalies: List[Anomaly]
@@ -305,7 +315,7 @@ def _observe_capture(cap: Any, base: str, order_id: Optional[str], origin: str, 
                 _anomaly(ctx, t, ("TYPE_NOT_NONEMPTY_STRING", "documented as an RFC 3339 date-time string"), cap[t])
         else:
             _absent(ctx, t)
-    if unit is not None:                       
+    if unit is not None:                       # context that lives on the purchase unit / order, not on the capture
         ship_path = f"{unit_base}.shipping.address"
         shipping = unit.get("shipping")
         addr = shipping.get("address") if isinstance(shipping, dict) else None
@@ -318,7 +328,7 @@ def _observe_capture(cap: Any, base: str, order_id: Optional[str], origin: str, 
             if a:
                 _anomaly(ctx, "unit.shipping.address", a, addr, ship_path)
         ps = order.get("payment_source") if order else None
-        if isinstance(ps, dict):             
+        if isinstance(ps, dict):                   # record the TYPE KEYS only: the object itself carries payer details we do not need
             ctx.obs.append(_make_obs(ctx, "order.payment_source.types", sorted(ps), sorted(ps), "KEYS_ONLY", Semantics.NOT_VERIFIED,
                                      ORDERS_SPEC, full_path="payment_source"))
         else:

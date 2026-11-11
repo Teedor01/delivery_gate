@@ -1,3 +1,4 @@
+"""Audit correction 6: every assessment visibly carries policy_status; UNREVIEWED is never presented as verified."""
 import unittest
 from tests.helpers import *
 

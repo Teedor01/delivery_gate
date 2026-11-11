@@ -1,3 +1,4 @@
+"""Phase 3 corrections: API-semantics layer, exposure separation, Disputes/webhook/jurisdiction source roles, engine untouched."""
 import ast, copy, hashlib, json, unittest
 from pathlib import Path
 from delivery_gate.engine import assess
@@ -45,8 +46,8 @@ def engine_case(h, extra_category=None):
 class ApiSemanticsLayer(unittest.TestCase):
     def test_per_token_meanings_are_recorded_with_exact_source_references(self):
         e, p, n = (sem.lookup(sem.SPS, t) for t in ("ELIGIBLE", "PARTIALLY_ELIGIBLE", "NOT_ELIGIBLE"))
-        self.assertEqual(len(e.described_claim_types), 2)                                
-        self.assertEqual(len(p.described_claim_types), 1)                                  
+        self.assertEqual(len(e.described_claim_types), 2)                                  # item not received AND unauthorized
+        self.assertEqual(len(p.described_claim_types), 1)                                  # item not received only
         self.assertEqual(n.described_claim_types, ())
         for row in (e, p, n):
             self.assertEqual(row.meaning_status, "DOCUMENTED")
@@ -79,7 +80,7 @@ class ApiSemanticsLayer(unittest.TestCase):
         self.assertEqual(c.find("seller_protection.status").api_semantics_ref, "orders_v2.capture.seller_protection.status=ELIGIBLE")
         self.assertIsNone(observe(response("10_unexpected_enum")).select_capture().find("seller_protection.status").api_semantics_ref)
         h = to_case(c)
-        self.assertEqual(h.case.fact("paypal_seller_protection_status").value, "ELIGIBLE")        
+        self.assertEqual(h.case.fact("paypal_seller_protection_status").value, "ELIGIBLE")        # still the bare opaque token
         self.assertNotIn("api_semantics", json.dumps(h.case.snapshot()))
 
     def test_documented_api_meaning_does_not_change_the_policy_assessment(self):
@@ -168,11 +169,11 @@ class DisputesObservation(unittest.TestCase):
     def test_lifecycle_stage_is_its_own_observation(self):
         d = dobs("d03_inr_external_chargeback")
         self.assertEqual(d.find("dispute_life_cycle_stage").raw_value, "CHARGEBACK")
-        self.assertEqual(d.find("reason").raw_value, "MERCHANDISE_OR_SERVICE_NOT_RECEIVED")        
+        self.assertEqual(d.find("reason").raw_value, "MERCHANDISE_OR_SERVICE_NOT_RECEIVED")        # reason is unaffected by the stage
         self.assertEqual(d.find("dispute_life_cycle_stage").api_semantics_ref, "disputes_v1.dispute.dispute_life_cycle_stage=CHARGEBACK")
-        self.assertIsNone(sem.lookup(sem.LS, "CHARGEBACK").documented_meaning)                     
+        self.assertIsNone(sem.lookup(sem.LS, "CHARGEBACK").documented_meaning)                     # a stage name is not documented as a route
         from paypal_adapter.handoff import DISPUTE_HANDOFF_PLAN
-        self.assertNotIn("dispute_life_cycle_stage", {local for _, local in DISPUTE_HANDOFF_PLAN}) 
+        self.assertNotIn("dispute_life_cycle_stage", {local for _, local in DISPUTE_HANDOFF_PLAN})  # observation only: nothing is built from it
 
     def test_route_comes_from_the_channel_alone(self):
         for n, route in (("d01_inr_internal_partial", "PAYPAL_DISPUTE"), ("d03_inr_external_chargeback", None), ("d04_unauthorised_external", None),
@@ -187,7 +188,7 @@ class DisputesObservation(unittest.TestCase):
         for reason in disputes.DOCUMENTED_REASONS:
             for stage in ("INQUIRY", "CHARGEBACK", "PRE_ARBITRATION", "ARBITRATION", None):
                 h = to_case(cap01(), dispute=dispute_with(reason, None, stage))
-                self.assertIsNone(h.case.fact("route"), (reason, stage))             
+                self.assertIsNone(h.case.fact("route"), (reason, stage))             # no channel -> no route, whatever the reason or stage says
             for ch, want in (("INTERNAL", "PAYPAL_DISPUTE"), ("EXTERNAL", None), ("ALERT", None)):
                 f = to_case(cap01(), dispute=dispute_with(reason, ch, "INQUIRY")).case.fact("route")
                 self.assertEqual(f.value if f else None, want, (reason, ch))
@@ -239,7 +240,7 @@ class HandoffWithDispute(unittest.TestCase):
             self.assertEqual((p.source_type, p.status), (SourceType.PAYPAL_API, ProvStatus.SYSTEM_RECORD))
             self.assertTrue(p.source_ref.startswith("fixture:paypal-dispute:"))
         self.assertTrue(h.linkage["linked"])
-        self.assertIsNone(h.case.fact("transaction_amount"))                           
+        self.assertIsNone(h.case.fact("transaction_amount"))                           # nor does the dispute amount reach the engine
         self.assertFalse({f.name for f in h.case.transaction_facts} - ALLOWED_FACTS)
 
     def test_an_unlinked_dispute_contributes_nothing(self):
@@ -253,7 +254,7 @@ class HandoffWithDispute(unittest.TestCase):
         a = assess(REG, engine_case(to_case(cap01(), dispute=dobs("d01_inr_internal_partial"))))
         self.assertEqual(a.protection_assessment, ProtectionAssessment.REQUIREMENTS_DEMONSTRATED_PAYPAL_DECIDES)
         ext = assess(REG, engine_case(to_case(cap01(), dispute=dobs("d03_inr_external_chargeback"))))
-        self.assertEqual(ext.protection_assessment, ProtectionAssessment.UNKNOWN)        
+        self.assertEqual(ext.protection_assessment, ProtectionAssessment.UNKNOWN)         # route unknown stays unknown: nothing is guessed
         self.assertTrue(ext.observed_inputs["route"]["state"] != "SUPPLIED")
         self.assertEqual((ext.policy_status, ext.paypal_acceptance), ("UNREVIEWED", "NOT_ESTABLISHED"))
 
@@ -262,7 +263,7 @@ class HandoffWithDispute(unittest.TestCase):
         self.assertIsNone(merchant_jurisdiction_fact("  ", source_ref="x"))
         f = merchant_jurisdiction_fact("US", source_ref="fixture:merchant-config")
         self.assertEqual((f.provenance.source_type, f.provenance.status), (SourceType.MERCHANT_INPUT, ProvStatus.MERCHANT_ASSERTED))
-        self.assertFalse(any(f.name == "merchant_account_country" for f in to_case(cap01()).case.transaction_facts))   
+        self.assertFalse(any(f.name == "merchant_account_country" for f in to_case(cap01()).case.transaction_facts))    # PayPal never supplies it here
 
 
 class Webhooks(unittest.TestCase):
@@ -297,7 +298,7 @@ class Webhooks(unittest.TestCase):
         d = webhooks.WebhookReceiver(self.Ok(), "W").receive({k.lower(): v for k, v in self.HEADERS.items()}, self.event())
         self.assertTrue(d.accepted)
         self.assertEqual(vars(d.read_request), {"dispute_id": "PP-D-FX0001", "event_id": "WH-1", "event_type": "CUSTOMER.DISPUTE.CREATED", "purpose": "FRESH_DISPUTES_API_READ"})
-        self.assertNotIn("300.00", json.dumps(vars(d.read_request)))                   
+        self.assertNotIn("300.00", json.dumps(vars(d.read_request)))                   # nothing from the payload survives except the id
 
     def test_other_events_malformed_events_and_duplicates_are_rejected(self):
         r = webhooks.WebhookReceiver(self.Ok(), "W")
@@ -356,7 +357,7 @@ class Phase1EngineUntouched(unittest.TestCase):
             self.assertTrue(p.is_file(), rel)
             self.assertEqual(hashlib.sha256(p.read_bytes()).hexdigest(), want, f"{rel} changed: this needs a separately reviewed policy change")
         live = {str(p.relative_to(ROOT)) for d in ("policy", "schemas") for p in (ROOT / d).rglob("*") if p.is_file() and "__pycache__" not in str(p)}
-        self.assertEqual({k for k in rec if k.startswith(("policy", "schemas"))}, live)       
+        self.assertEqual({k for k in rec if k.startswith(("policy", "schemas"))}, live)       # no policy/schema file added or removed either
 
 
 if __name__ == "__main__":

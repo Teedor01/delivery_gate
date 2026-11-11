@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Gate extraction output (Phase 2)",
+  "description": "The ONLY shape the extractor may emit. Extra keys (for example a decision or protection field) reject the whole output. Facts whose model-authored fields contain policy-conclusion language are rejected; the source_span quotes the artifact and is exempt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "facts",
+    "extraction_notes"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string"
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fact_id",
+          "fact",
+          "value",
+          "normalized_value",
+          "source_span",
+          "confidence",
+          "ambiguity",
+          "ambiguity_note",
+          "attribution",
+          "modality",
+          "entity_ref",
+          "artifact_id"
+        ],
+        "properties": {
+          "fact_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,20}$"
+          },
+          "fact": {
+            "enum": [
+              "tracking_number",
+              "carrier_name",
+              "delivery_status",
+              "delivery_date",
+              "delivery_time",
+              "shipment_date",
+              "recipient_address",
+              "intended_ship_to_address",
+              "signature_present",
+              "redirect_reported",
+              "order_reference"
+            ],
+            "description": "Closed vocabulary. Anything else (including any policy conclusion) is rejected."
+          },
+          "value": {
+            "type": "string",
+            "description": "The value as written in the artifact, or UNKNOWN. Must appear in source_span."
+          },
+          "normalized_value": {
+            "description": "Canonical typed value or the string UNKNOWN. Dates are ISO only when the span holds a complete unambiguous date; booleans need a lexical cue; addresses are an object copied from the span (no expansion, no invented components).",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "enum": [
+                    "line1",
+                    "line2",
+                    "city",
+                    "region",
+                    "postal_code",
+                    "country"
+                  ]
+                }
+              }
+            ]
+          },
+          "source_span": {
+            "type": "string",
+            "maxLength": 400,
+            "description": "EXACT substring of the artifact. Validated character-for-character."
+          },
+          "confidence": {
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "description": "Extraction confidence only. Never consumed downstream."
+          },
+          "ambiguity": {
+            "type": "boolean",
+            "description": "Must be true whenever normalized_value is UNKNOWN."
+          },
+          "ambiguity_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attribution": {
+            "enum": [
+              "CARRIER_STATEMENT",
+              "MERCHANT_STATEMENT",
+              "CUSTOMER_STATEMENT_RELAYED",
+              "THIRD_PARTY_STATEMENT",
+              "UNKNOWN"
+            ],
+            "description": "Who the ARTIFACT TEXT says is making the statement."
+          },
+          "modality": {
+            "enum": [
+              "DIRECT",
+              "REPORTED",
+              "HEDGED"
+            ],
+            "description": "HEDGED forces normalized_value UNKNOWN and ambiguity true."
+          },
+          "entity_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Order reference exactly as it appears in the artifact, when several orders are described."
+          },
+          "artifact_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "extraction_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "x-fact-vocabulary": {
+    "tracking_number": {
+      "type": "string",
+      "feeds_engine_as": "tracking_number",
+      "why_not": null
+    },
+    "carrier_name": {
+      "type": "string",
+      "feeds_engine_as": null,
+      "why_not": "no policy requirement models the carrier name"
+    },
+    "delivery_status": {
+      "type": "enum",
+      "feeds_engine_as": "delivered_status",
+      "why_not": null
+    },
+    "delivery_date": {
+      "type": "date",
+      "feeds_engine_as": "delivery_date",
+      "why_not": null
+    },
+    "delivery_time": {
+      "type": "time",
+      "feeds_engine_as": null,
+      "why_not": "no policy requirement models the delivery time of day"
+    },
+    "shipment_date": {
+      "type": "date",
+      "feeds_engine_as": "shipment_date",
+      "why_not": null
+    },
+    "recipient_address": {
+      "type": "address",
+      "feeds_engine_as": "recipient_address",
+      "why_not": null
+    },
+    "intended_ship_to_address": {
+      "type": "address",
+      "feeds_engine_as": null,
+      "why_not": "a merchant-stated intended address is not the PayPal Transaction Details address"
+    },
+    "signature_present": {
+      "type": "bool",
+      "feeds_engine_as": null,
+      "why_not": "signature confirmation is UNVERIFIED: DO NOT MODEL"
+    },
+    "redirect_reported": {
+      "type": "bool",
+      "feeds_engine_as": "redirect_detected",
+      "why_not": null
+    },
+    "order_reference": {
+      "type": "string",
+      "feeds_engine_as": null,
+      "why_not": "used only to group facts by order"
+    }
+  }
+}

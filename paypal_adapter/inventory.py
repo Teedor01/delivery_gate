@@ -1,3 +1,21 @@
+"""Field inventory: every PayPal field relevant to the MVP, classified, with its documentation reference.
+
+Classification (semantics, i.e. what PayPal itself documents about the field):
+  OBSERVED_AND_DOCUMENTED     the field appears in primary PayPal API docs AND a primary doc states its meaning
+  OBSERVED_SEMANTICS_UNKNOWN  the field appears in primary PayPal docs/samples but no primary doc states what it means
+  NOT_AVAILABLE               the retrieved primary docs show the resource does NOT expose it
+  NOT_VERIFIED                not retrieved/checked in this phase; no claim is made either way
+
+`handoff` says what the adapter does with the field:
+  ENGINE_FACT                 handed to the engine as a TransactionFact (documented meaning, no policy interpretation)
+  OBSERVATION_ONLY            recorded with provenance; no engine consumer exists, and none is added here
+  WITHHELD                    observed, deliberately NOT handed to the engine because the mapping step is not established
+  NOT_COLLECTED               the adapter does not read it (no current rule needs it, or it is not available)
+
+`policy_equivalence` is a SEPARATE question from the documented API meaning: does primary documentation establish that the API value IS a legal-policy
+condition (e.g. the Transaction Details eligibility mark)? Nothing in this table has an established equivalence.
+All entries describe the Orders v2 `capture` resource unless stated. Retrieved 2026-10-31.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
@@ -30,11 +48,11 @@ class FieldSpec:
     path: str
     semantics: Semantics
     doc_ref: str
-    documented_meaning: str           
-    delivery_gate_fact: Optional[str] 
-    engine_consumer: Optional[str]     
+    documented_meaning: str            # a paraphrase of what the primary doc says, or why nothing can be said
+    delivery_gate_fact: Optional[str]  # the engine fact this feeds, if any
+    engine_consumer: Optional[str]     # what in the engine reads that fact, if anything
     handoff: Handoff
-    policy_equivalence: str = "NOT_ESTABLISHED"      
+    policy_equivalence: str = "NOT_ESTABLISHED"      # legal-policy equivalence of the API value; separate from its documented API meaning
     note: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -146,6 +164,7 @@ INVENTORY: Tuple[FieldSpec, ...] = (
               H.NOT_COLLECTED, note="Possibly the only place the policy's own eligibility label is exposed; unchecked."),
 )
 
+# Tokens PayPal documents for each enum. Used ONLY to label an observed token as documented or not; never to give it meaning.
 DOCUMENTED_STATUS_TOKENS = frozenset({"ELIGIBLE", "PARTIALLY_ELIGIBLE", "NOT_ELIGIBLE"})
 DOCUMENTED_DISPUTE_CATEGORIES = frozenset({"ITEM_NOT_RECEIVED", "UNAUTHORIZED_TRANSACTION"})
 DOCUMENTED_CAPTURE_STATUSES = frozenset({"COMPLETED", "DECLINED", "PARTIALLY_REFUNDED", "PENDING", "REFUNDED", "FAILED"})

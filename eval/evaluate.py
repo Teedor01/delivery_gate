@@ -1,3 +1,9 @@
+"""Extraction evaluation. TEST data only; no training anywhere. Run:  python -m eval.evaluate [--live]
+
+Default replays eval/recorded_outputs (produced by the assistant that wrote the gold; see MANIFEST.json), so the numbers measure
+the validator/bridge plumbing and the recorded outputs, NOT the accuracy of an independent model. `--live` uses AnthropicExtractor
+(needs ANTHROPIC_API_KEY and EXTRACTION_MODEL) for a real measurement.
+"""
 from __future__ import annotations
 
 import json
@@ -13,6 +19,7 @@ from delivery_extraction.pipeline import ExtractionRun, run_extraction
 from delivery_extraction.schema import Artifact, CandidateFact
 from eval.corpus import ADVERSARIAL_IDS, ARTIFACTS, CASE_GROUPS, EXPECTED_CONTRADICTIONS, GOLD
 
+# Thresholds proposed up front (they were not previously agreed; adjust deliberately, not after seeing results).
 THRESHOLDS = {
     "fact_recall": (">=", 0.95), "fact_precision": (">=", 0.95), "source_span_correctness": (">=", 0.95),
     "normalization_correctness": (">=", 1.0), "attribution_correctness": (">=", 0.95), "modality_correctness": (">=", 0.95),

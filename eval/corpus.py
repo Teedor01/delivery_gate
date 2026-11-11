@@ -1,3 +1,10 @@
+"""Hand-labelled EVALUATION corpus (not training data). 15 artifacts, all fictional.
+
+Gold entries say what each artifact supports. `must_not_extract` lists values an extractor must never output (hallucinations,
+role confusions, hedges promoted to facts). The gold was written before the recorded outputs, from the artifact text alone.
+A gold fact: fact, normalized_value, entity_ref, span_contains (a substring the extracted span must contain), attribution,
+modality, ambiguity.
+"""
 from __future__ import annotations
 
 from typing import Any, Dict, List
