@@ -57,7 +57,7 @@ class Screens(unittest.TestCase):
         for path in ("/", "/payments", "/payments/DG-20481"):
             html = self.pages.get(path) or get(self.app, path)[2]
             labels = re.findall(r'<a class="nav-item[^"]*" href="[^"]+">.*?<span>([^<]+)</span>', html)
-            self.assertEqual(labels, ["Overview", "Payments", "Evidence"], path)
+            self.assertEqual(labels, ["Overview", "Payments", "Evidence", "Live sandbox"], path)
 
     def test_no_inline_script_style_or_external_resource(self):
         for path, html in self.pages.items():

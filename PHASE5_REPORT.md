@@ -181,3 +181,12 @@ Also verified: zero console errors, CSP violations or failed requests across ~48
 **Behaviour change to be aware of:** if `GROQ_API_KEY` is set and `EXTRACTION_PROVIDER` is not, Groq is chosen even when an Anthropic key is also present. Built-in samples still replay recorded outputs, so the demo remains deterministic.
 
 **Unresolved:** live Groq behaviour (rate limits on free tier, a possible difference from the documented request format, extraction quality) is unknown until `groq_check --extract` is run with a real key.
+
+
+## Phase 6 status (Nov 12, 2026)
+
+Verified here: full suite `Ran 476 tests ... OK` (467 before this phase plus 9 new, run with `-X dev -W default`; no ResourceWarning appeared in this environment, so the earlier 404 warning was not reproduced). The two tests that pinned the nav to three items now expect the added "Live sandbox" item.
+
+Not verified: any live PayPal request, any live Groq call, `eval.evaluate --live`. This environment had no network route to either service and neither credential. Mocked tests do not count as live verification. Live Groq metrics: none recorded.
+
+Open items: (1) PayPal approval and capture by a sandbox buyer; (2) `GROQ_API_KEY` run of `groq_check --extract` and `eval.evaluate --live`; (3) git author email is the placeholder `REPLACE_WITH_GITHUB_NOREPLY@users.noreply.github.com` on all 19 commits and must be replaced before publishing; (4) fresh-clone test and browser run on your machine.

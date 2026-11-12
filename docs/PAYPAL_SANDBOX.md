@@ -81,3 +81,22 @@ python3 -m eval.evaluate --live                        # optional: all 15 artifa
 ```
 
 Record the printed result in `docs/GROQ.md` or here **after** running it. Remember the standing caveat: the earlier recorded-output evaluation measured the pipeline, not a live model.
+
+
+## Phase 6 update (Nov 12, 2026)
+
+**What was added (all tested with mocked transports only):**
+- `/live` page and `GET /api/live`, `POST /api/live/observe` in the UI. Live observations are labelled `LIVE_SANDBOX`, show HTTP status, PayPal debug id, retrieval time, response SHA-256 and the raw field values, and never enter the fixture payments or the policy engine. With no credentials the page says so and no request is made.
+- `tools/sandbox_order_flow.py`: a separate, explicitly invoked workflow (`create`, `status`, `capture ORDER_ID --yes-capture`) using the documented Orders v2 endpoints. It is not imported by `paypal_adapter/`, which stays read-only.
+
+**Reported by the project owner, not reproduced or recorded in this repository:** OAuth succeeded and order `7F960922VC6292745` (USD 10.00, `CREATED`) was retrieved with HTTP 200, debug id `ca594fa6fdcc9`. That order was never approved or captured.
+
+**Not verified:** no capture exists yet, so no capture retrieval, audit record or response hash has been produced. This environment had no network route to PayPal and no credentials, so none of the live steps were run here.
+
+**Why the approval page may have failed (hypotheses from PayPal's documented flow, not diagnosed):** the buyer must sign in with a sandbox *personal* account, not a real PayPal login or a sandbox business account; the order must be created with `payment_source.paypal.experience_context` so PayPal returns a `payer-action` link; and capture before approval fails with `ORDER_NOT_APPROVED`.
+
+**To finish the live check:**
+1. `python3 -m tools.sandbox_order_flow create` and open the printed link signed in to a sandbox buyer account.
+2. `python3 -m tools.sandbox_order_flow capture ORDER_ID --yes-capture`
+3. `python3 -m paypal_adapter.sandbox_check --order ORDER_ID --save live_captures`
+4. Start the UI and open `/live`.

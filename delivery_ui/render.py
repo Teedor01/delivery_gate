@@ -7,7 +7,7 @@ from urllib.parse import quote, urlencode
 from delivery_ui.components import button, chip, esc, highlighted_text, icon, logo, source_chip, tone_icon
 from delivery_ui.presenter import SOURCE_KINDS, KIND_LABELS
 
-NAV = (("overview", "/", "home", "Overview"), ("payments", "/payments", "card", "Payments"), ("evidence", "/evidence", "file", "Evidence"))
+NAV = (("overview", "/", "home", "Overview"), ("payments", "/payments", "card", "Payments"), ("evidence", "/evidence", "file", "Evidence"), ("live", "/live", "lock", "Live sandbox"))
 TABS = (("evidence", "Evidence"), ("assessment", "Assessment details"), ("whatif", "What changes?"), ("provenance", "Provenance"))
 FILTERS = (("all", "All"), ("attention", "Needs attention"), ("review", "Under review"), ("ready", "Evidence ready"), ("unassessable", "Can't be assessed"))
 KINDS = (("OTHER", "Other document"), ("CARRIER_EMAIL", "Carrier email"), ("TRACKING_PASTE", "Tracking page text"), ("MERCHANT_STATEMENT", "Merchant statement"),
@@ -31,16 +31,18 @@ def shell(title: str, active: str, body: str, q: str = "", flash: Optional[Dict[
     if flash and flash.get("msg"):
         lvl = flash.get("level") if flash.get("level") in ("ok", "error", "info") else "info"
         fl = f'<div class="flash flash-{lvl}" role="{"alert" if lvl == "error" else "status"}" data-testid="flash">{esc(flash["msg"])}</div>'
+    pill = ('<span class="pill-fixture" title="This page shows real responses from the PayPal sandbox, not fixtures.">' + icon("lock", 14) + 'Live sandbox (not fixture)</span>' if active == "live" else
+            '<span class="pill-fixture" title="All PayPal data on this page comes from fixtures, not a live PayPal account.">' + icon("lock", 14) + 'Fixture data</span>')
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} · Delivery Gate</title><link rel="stylesheet" href="/static/app.css"></head>
 <body><div class="app">
 <aside class="side"><a class="brand" href="/">{logo(36)}<span>Delivery<br>Gate</span></a>
 <nav class="nav" aria-label="Main">{nav}</nav>
-<div class="side-foot">{icon("shield", 26)}<div><strong>Delivery Gate</strong><small>Fixture demo.<br>PayPal makes the final decision.</small></div></div></aside>
+<div class="side-foot">{icon("shield", 26)}<div><strong>Delivery Gate</strong><small>Fixture payments; live sandbox page is separate.<br>PayPal makes the final decision.</small></div></div></aside>
 <div class="main"><header class="top">
 <form class="search" action="/payments" method="get" role="search">{icon("search", 18)}<input type="search" name="q" value="{esc(q)}" placeholder="Search transactions, orders or reference numbers…" aria-label="Search payments"></form>
-<div class="top-right"><span class="pill-fixture" title="All PayPal data in this demo comes from fixtures, not a live PayPal account.">{icon("lock", 14)}Fixture data</span>
+<div class="top-right">{pill}
 <span class="avatar" aria-hidden="true">DM</span><span class="who">Demo merchant</span></div></header>
 <main class="content" id="content">{fl}{body}</main></div></div>
 <script src="/static/app.js" defer></script></body></html>"""
@@ -527,3 +529,32 @@ def page_evidence_index(items: List[Dict[str, Any]]) -> str:
 def page_error(code: int, title: str, message: str) -> str:
     return shell(title, "", f'<div class="card empty err" data-testid="error-page" data-code="{code}">{icon("alert", 36)}<h1 class="h2">{esc(title)}</h1><p>{esc(message)}</p>'
                  f'<p>{button("Back to Payments", "/payments", "primary")}</p></div>')
+
+
+def page_live(configured: bool, history: List[Dict[str, Any]], flash: Optional[Dict[str, str]] = None, error: Optional[Dict[str, Any]] = None) -> str:
+    """Read-only live PayPal SANDBOX observations. Separate from the fixture payments; never assessed here."""
+    cfg = ('<span class="pill tone-green" data-testid="live-configured">Sandbox credentials present in the server environment</span>' if configured else
+           '<span class="pill tone-slate" data-testid="live-not-configured">No sandbox credentials in the server environment. Nothing can be fetched.</span>')
+    form = (f'<form method="post" action="/live/observe" class="card" data-testid="live-form"><h3>Retrieve from the PayPal sandbox</h3>{cfg}'
+            '<p class="muted small">A read-only GET to api-m.sandbox.paypal.com. Nothing is created, captured or changed. The result is shown exactly as PayPal returned it.</p>'
+            '<label>Resource <select name="kind"><option value="capture">Capture</option><option value="order">Order</option></select></label> '
+            '<label>ID <input name="resource_id" required maxlength="64" data-testid="live-id"></label> '
+            '<label>Capture to observe (orders with several captures) <input name="select" maxlength="64"></label> '
+            f'<button class="btn btn-primary" type="submit" data-testid="live-submit"{"" if configured else " disabled"}>Retrieve</button></form>')
+    err = ""
+    if error:
+        err = (f'<div class="flash flash-error" role="alert" data-testid="live-error"><strong>Retrieval failed ({esc(error["code"])}).</strong> {esc(error["message"])}'
+               + (f' HTTP {esc(error["status"])}.' if error.get("status") else "") + (f' PayPal debug id: {esc(error["debug_id"])}.' if error.get("debug_id") else "") + '</div>')
+    cards = []
+    for h in history:
+        o = h["observation"]
+        rows = "".join(f'<tr><td>{esc(x["local_path"])}</td><td><code>{esc(x["raw_value"])}</code></td><td>{esc(x.get("enum_state") or "")}</td></tr>' for x in o["observations"])
+        absent = ", ".join(esc(a.get("local_path", "?")) for a in o["absent"]) or "none"
+        cards.append(f'<section class="card" data-testid="live-observation" data-origin="{esc(h["origin"])}"><h3><span class="pill tone-amber">LIVE_SANDBOX</span> {esc(h["resource"])} {esc(h["resource_id"])}</h3>'
+                     f'<ul class="plain"><li>Request: GET https://{esc(h["host"])}{esc(h["request_path"])}</li><li>HTTP status: {esc(h["http_status"])}</li><li>PayPal debug id: {esc(h["paypal_debug_id"])}</li>'
+                     f'<li>Retrieved at: {esc(h["observed_at"])}</li><li>Response SHA-256 (canonical JSON): <code>{esc(h["response_sha256"])}</code></li></ul>'
+                     f'<table class="tbl compact"><thead><tr><th>Field</th><th>Value as received</th><th>Enum state</th></tr></thead><tbody>{rows}</tbody></table>'
+                     f'<p class="muted small">Absent from the response (unknown, not assumed): {absent}.</p>'
+                     '<p class="muted small">This is an observation, not an assessment. PayPal status values are opaque. A sandbox response is not evidence of Seller Protection eligibility.</p></section>')
+    empty = '' if cards else '<div class="card empty" data-testid="live-empty"><h3>No live observations yet</h3><p>Nothing has been retrieved in this session. Fixture payments elsewhere in the app are not live data.</p></div>'
+    return shell("Live sandbox", "live", page_title("Live sandbox", "Real PayPal sandbox responses, kept apart from fixture payments.") + form + err + empty + "".join(cards))

@@ -108,3 +108,11 @@ git push -u origin main
 ```
 
 If you would rather skip the email replacement, you can run only the `git config` line and leave the placeholder; it is harmless but looks unfinished.
+
+
+## Phase 6 additions
+- [x] Live sandbox page and API (mocked-tested), clearly labelled LIVE_SANDBOX, separate from fixtures
+- [x] Separate sandbox order/capture workflow (`tools/sandbox_order_flow.py`), adapter still read-only
+- [ ] Real sandbox capture obtained and retrieved (needs a sandbox buyer approval; not done)
+- [ ] Live Groq extraction and `eval.evaluate --live` (needs GROQ_API_KEY; not done)
+- [ ] Replace placeholder git author email before publishing

@@ -168,3 +168,8 @@ Follow [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the exact click-by-click sequenc
 ## 15. License
 
 Licensed under the **Apache License, Version 2.0**. See [`LICENSE`](LICENSE).
+
+
+## Live sandbox page (optional)
+
+With `PAYPAL_SANDBOX_CLIENT_ID` and `PAYPAL_SANDBOX_CLIENT_SECRET` set, the `/live` page retrieves a sandbox capture or order (read-only) and shows it as `LIVE_SANDBOX`, apart from the fixture payments. See `docs/PAYPAL_SANDBOX.md`. Live PayPal and Groq runs have not yet been recorded in this repository.

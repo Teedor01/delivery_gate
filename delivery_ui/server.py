@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from delivery_ui import presenter as P
 from delivery_ui import render as R
+from delivery_ui.live import LiveError, LiveSandboxService
 from delivery_ui.service import DeliveryGateService, NotFound, ServiceError
 
 STATIC = Path(__file__).resolve().parent / "static"
@@ -43,8 +44,9 @@ class BadRequest(ServiceError):
 
 
 class App:
-    def __init__(self, service: Optional[DeliveryGateService] = None):
+    def __init__(self, service: Optional[DeliveryGateService] = None, live: Optional[LiveSandboxService] = None):
         self.svc = service or DeliveryGateService()
+        self.live = live or LiveSandboxService()
         self.lock = threading.RLock()
 
     # -- entry point -----------------------------------------------------------------------------------------------------------------
@@ -88,7 +90,7 @@ class App:
     def _route(self, method: str, path: str, q: Dict[str, str], body: bytes, ctype: str) -> Response:
         svc = self.svc
         if path == "/healthz":
-            return _json(200, {"ok": True, "fixture_data": True})
+            return _json(200, {"ok": True, "fixture_data": True, "live_sandbox_configured": self.live.configured()})
         if path.startswith("/static/"):
             return self._static(path[len("/static/"):])
         flash = {"msg": q.get("msg", "")[:300], "level": q.get("level", "info")}
@@ -98,6 +100,10 @@ class App:
                 return _html(200, R.page_overview(rows, P.counters(rows), flash))
             if path == "/payments":
                 return self._payments(q, flash)
+            if path == "/live":
+                return _html(200, R.page_live(self.live.configured(), self.live.history, flash))
+            if path == "/api/live":
+                return _json(200, {"origin": "LIVE_SANDBOX", "configured": self.live.configured(), "observations": self.live.history})
             m = re.fullmatch(r"/payments/([^/]+)", path)
             if m:
                 return self._detail(m.group(1), q, flash)
@@ -210,6 +216,16 @@ class App:
         if path in ("/reset", "/api/reset"):
             svc.reset()
             return _json(200, {"ok": True}) if api else _redirect("/")
+        if path in ("/live/observe", "/api/live/observe"):
+            f = self._fields(body, ctype, {"kind", "resource_id", "select"})
+            try:
+                rec = self.live.observe(f.get("kind", ""), f.get("resource_id", ""), f.get("select"))
+            except LiveError as e:
+                err = {"code": e.code, "message": str(e), "status": e.status, "debug_id": e.debug_id}
+                if api:
+                    return _json(400 if e.code in ("bad_kind", "not_configured") else 502, {"error": e.code, "message": str(e), "http_status": e.status, "paypal_debug_id": e.debug_id})
+                return _html(200, R.page_live(self.live.configured(), self.live.history, None, err))
+            return _json(200, rec) if api else _redirect(R.url("/live", msg="Retrieved from the PayPal sandbox.", level="ok"))
         m = re.fullmatch(r"/(?:api/)?payments/([^/]+)/(artifacts|evidence)", path)
         if m:
             ref = m.group(1)
@@ -291,8 +307,8 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def make_server(service: Optional[DeliveryGateService] = None, host: str = "127.0.0.1", port: int = 0) -> ThreadingHTTPServer:
-    app = App(service)
+def make_server(service: Optional[DeliveryGateService] = None, host: str = "127.0.0.1", port: int = 0, live: Optional[LiveSandboxService] = None) -> ThreadingHTTPServer:
+    app = App(service, live)
     handler = type("BoundHandler", (Handler,), {"app": app})
     srv = ThreadingHTTPServer((host, port), handler)
     srv.app = app                                                        
@@ -301,7 +317,7 @@ def make_server(service: Optional[DeliveryGateService] = None, host: str = "127.
 
 def main(argv: Optional[List[str]] = None) -> None:
     import argparse
-    ap = argparse.ArgumentParser(description="Delivery Gate demo UI (fixture data, no live PayPal)")
+    ap = argparse.ArgumentParser(description="Delivery Gate UI (fixture payments; optional read-only live sandbox page)")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8080)
     a = ap.parse_args(argv)

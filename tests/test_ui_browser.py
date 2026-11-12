@@ -56,7 +56,7 @@ class Browser(unittest.TestCase):
         self.go("/payments")
         self.assertEqual(self.page.title(), "Payments · Delivery Gate")
         nav = self.page.locator("nav.nav a")
-        self.assertEqual([t.strip() for t in nav.all_inner_texts()], ["Overview", "Payments", "Evidence"])
+        self.assertEqual([t.strip() for t in nav.all_inner_texts()], ["Overview", "Payments", "Evidence", "Live sandbox"])
         self.assertIn("Fixture data", self.page.locator(".pill-fixture").inner_text())
         bg = self.page.evaluate("getComputedStyle(document.body).backgroundColor")
         self.assertEqual(bg, "rgb(245, 244, 239)")                                         # Warm Ivory
