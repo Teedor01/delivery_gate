@@ -35,3 +35,6 @@ Thumbs.db
 playwright-report/
 test-results/
 traces/
+
+# Saved live-sandbox audit records (review before deciding to publish any)
+live_captures/

@@ -2,7 +2,7 @@
 
 **Delivery Gate helps an online seller see, before PayPal decides, what their evidence actually demonstrates in a disputed payment, what is missing or uncertain, and what would change if they supplied more.**
 
-> **Read this first.** Everything you see in this repository runs on **fixture data**. It does **not** call PayPal's live or sandbox APIs, and the offline demo reads **recorded** extraction outputs, not a live AI model. Delivery Gate does **not** decide disputes and never says a seller is "protected": **PayPal makes the final decision.** It is a hackathon prototype, not a production system, and it is not endorsed by or affiliated with PayPal.
+> **Read this first.** The web application runs on **fixture data** and its offline demo reads **recorded** extraction outputs, not a live AI model. A separate, read-only **PayPal sandbox command** exists (`python3 -m paypal_adapter.sandbox_check`), tested with mocked HTTP; **a real sandbox request has not yet been run and recorded**, and sandbox data is not yet shown in the web UI. See `docs/PAYPAL_SANDBOX.md` for the exact status. Delivery Gate does **not** decide disputes and never says a seller is "protected": **PayPal makes the final decision.** It is a hackathon prototype, not a production system, and it is not endorsed by or affiliated with PayPal.
 
 Built for the [PayPal AI Hackathon 2026](https://paypalaihackathon.devpost.com/).
 
@@ -70,7 +70,7 @@ US Seller Protection, physical goods: **Item Not Received**, **Unauthorized Tran
 | Component | Status |
 |---|---|
 | PayPal observation adapter (`paypal_adapter/`) for Orders v2 captures and Disputes API responses | Implemented, **tested against fixtures only** |
-| Live or sandbox PayPal API call | **Not performed.** `PayPalSandboxSource` deliberately raises `NotImplementedError` |
+| Read-only PayPal **sandbox** client and command (`paypal_adapter/sandbox_client.py`, `sandbox_check.py`): one OAuth token request plus `GET` of a capture or order, origin-labelled `LIVE_SANDBOX`, raw response and provenance preserved | **Implemented and tested with a mocked transport (27 tests). A real sandbox call has NOT yet been run and recorded** (the author's build environment had no credentials or network). Not shown in the web UI. The older `PayPalSandboxSource` stub still deliberately refuses to run |
 | Webhook handling | Designed as "verified notification triggers a fresh API read"; **not connected to any live endpoint** |
 | The eight payments in the UI | **Fixture data**, labelled "Fixture data" on every page |
 
@@ -78,7 +78,7 @@ PayPal API status values (for example `seller_protection.status`) are kept as op
 
 ## 6. Requirements and installation
 
-- **Python 3.12** (developed and tested on 3.12.3). The application and the 379 non-browser tests use the **standard library only**: no `pip install` is needed to run the app.
+- **Python 3.12** (developed and tested on 3.12.3). The application and the 406 non-browser tests use the **standard library only**: no `pip install` is needed to run the app.
 - **Optional, for the 21 browser tests:** `pip install playwright` then `playwright install chromium`. Without Playwright those tests skip automatically.
 
 ```bash
@@ -113,7 +113,7 @@ Open <http://127.0.0.1:8080>. State is in memory and resets when the server rest
 python3 -m unittest discover -s tests -t .
 ```
 
-Expected: **400 tests** (248 from Phases 1–3 plus 152 UI tests), about 50 seconds. `tests/phase1_engine_hashes.json` pins the engine, registry, policy and schema files; a failure there means one of them changed and needs review.
+Expected: **427 tests** (248 from Phases 1–3, 152 UI tests, 27 sandbox-client tests), about 50 seconds. `tests/phase1_engine_hashes.json` pins the engine, registry, policy and schema files; a failure there means one of them changed and needs review.
 
 ## 10. Run the demo
 
@@ -134,7 +134,7 @@ Follow [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the exact click-by-click sequenc
 
 ## 12. Known limitations
 
-- Fixture-driven; **no live PayPal integration**. In-memory state; single demo merchant; English only.
+- The web app is fixture-driven. The sandbox client exists but its **first real run is still to be performed and recorded**; sandbox data is not displayed in the UI; no disputes or webhooks are read live. In-memory state; single demo merchant; English only.
 - The offline demo reads **recorded** extractions for the 15 built-in samples only. Other text cannot be read offline; the UI says so. Live extraction must be configured for it.
 - **Live model accuracy has not been evaluated.** The earlier evaluation (15 hand-labelled artifacts, 67 gold facts) used outputs authored by Claude, not a live model run, and its gold labels were corrected once after a failed first run. Treat those metrics as a test of the pipeline, not of model accuracy.
 - Text uploads only (`.txt`, `.eml`, `.csv`, `.md`, 200 KB). No PDFs or images.
@@ -158,9 +158,9 @@ Follow [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the exact click-by-click sequenc
 | `delivery_gate/` | Policy models, rule registry, deterministic engine (Phase 1) |
 | `policy/`, `schemas/` | Rule definitions, cited source passages, JSON schemas |
 | `delivery_extraction/`, `eval/` | Evidence extraction, validation, review bridge; evaluation corpus (Phase 2) |
-| `paypal_adapter/`, `fixtures/paypal/` | PayPal observation adapter and fixtures (Phase 3) |
+| `paypal_adapter/`, `fixtures/paypal/` | PayPal observation adapter and fixtures (Phase 3); read-only sandbox client and `sandbox_check` command (Phase 5) |
 | `delivery_ui/` | Browser application: server, presenter, renderer, fixtures (Phase 4) |
-| `tests/` | 400 tests |
+| `tests/` | 427 tests |
 | `docs/` | Phase reports (`PHASE1`–`PHASE4`) and screenshots |
 | `tools/` | Walkthrough and fixture-building scripts |
 

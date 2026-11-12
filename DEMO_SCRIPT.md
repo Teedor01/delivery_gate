@@ -41,4 +41,5 @@ The deterministic engine now reports requirements demonstrated, the same result 
 - If a step goes wrong mid-take, click **Reset demo data** and retake from the top; the starting state is identical every time.
 - Keep the mouse slow and deliberate; pause one second on each banner so viewers can read it.
 - The attest step needs a typed name. Type it before the take starts if you prefer, but do not skip showing the **Reviewed** result.
+- **Optional 10-second terminal segment, only if the real sandbox check has actually succeeded** (`docs/PAYPAL_SANDBOX.md` section 4 filled in): show `python3 -m paypal_adapter.sandbox_check --capture <ID>` printing `ORIGIN: LIVE_SANDBOX` and `HTTP 200`, and say: "Separately, a read-only command retrieves a real PayPal sandbox capture." If it has not succeeded, do not include or mention this segment. Never record your credentials on screen.
 - Upload to YouTube as **Public** or **Unlisted** per the hackathon rules (see `SUBMISSION_CHECKLIST.md`), and confirm the displayed duration is under 3:00.

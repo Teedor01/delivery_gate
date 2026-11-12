@@ -9,7 +9,7 @@ Date of work: Nov 11, 2026. Python 3.12.3, Chromium (Playwright). Everything bel
 | Core product (Phases 1–4) | Works. Not rebuilt. No product, policy or engine logic changed. |
 | What was wrong | The **committed** repository was incomplete *and* partly corrupted; the reports' claims about it were inaccurate (details below). |
 | Repair | A separate publication copy contains every required file; a fresh clone of it passes **400/400** tests and the full browser demo. |
-| Open risk | The hackathon asks for PayPal **sandbox** integration; this project has none (fixtures only). See `SUBMISSION_CHECKLIST.md`. |
+| Open risk | The hackathon asks for PayPal **sandbox** integration. A read-only sandbox client now exists (§10) but has **not yet made a verified real call**. See `SUBMISSION_CHECKLIST.md`. |
 
 ## 2. Stage A findings (before any change)
 
@@ -120,6 +120,8 @@ Also verified: zero console errors, CSP violations or failed requests across ~48
 
 ## 9. Final verification (all executed on a fresh `git clone` of the publication repo)
 
+*Figures in §3, §6 and §9 are from the first hand-off (400 tests). §10 records the later sandbox-client addendum and the updated totals (427 tests); the browser verification was re-run after it, see §10 final line.*
+
 | Check | Result |
 |---|---|
 | `python3 -m unittest discover -s tests -t .` | **Ran 400 tests, OK**: 400 passed, 0 failed, 0 errors, 0 skipped, ~51 s |
@@ -132,3 +134,26 @@ Also verified: zero console errors, CSP violations or failed requests across ~48
 **Documentation defect found and fixed during final verification.** My first draft of the runbook and script told the reader to click "Review evidence" on the payment page. A real-click walkthrough showed that label exists only in the Payments side panel; on the payment page the button is **Review & update evidence**, and a row click opens a side panel whose **View assessment** link opens the payment page. Both documents were corrected and the corrected path was re-walked with real clicks. The automated 27-check script navigates by URL, so it could not have caught this; the real-click walkthrough did.
 
 **Claims in the README that I checked against the code before keeping them**: 21 browser tests; recorded-vs-live extraction wording; gold-label correction history (documented in `docs/PHASE2.md`); a unit test comparing UI digests with an engine oracle; the Reset control; the CSP header. Three statements that the code did not support were removed or reworded (a claim about what the model "sees", a policy detail the repo does not mention, and a more specific label for DG-20463 than the fixture gives).
+
+## 10. Addendum: read-only PayPal sandbox client (added after the first hand-off)
+
+**Request:** implement the smallest safe, real PayPal sandbox integration, and test live AI extraction if possible.
+
+**What could and could not be done.** The build environment had **no PayPal sandbox credentials, no Anthropic key or model configured, and no outbound network** (the sandbox host did not resolve; the Anthropic endpoint returned a proxy 403). Therefore:
+
+| Item | Result |
+|---|---|
+| Real PayPal sandbox request | **Not performed.** No integration is claimed to have been verified live |
+| Live AI extraction run | **Not performed.** No live-AI functionality is claimed to have been tested |
+| Read-only sandbox client + CLI | Implemented (`paypal_adapter/sandbox_client.py`, `paypal_adapter/sandbox_check.py`), additive only |
+| Mocked tests | 27 new tests, all pass. 7 sabotage checks (host guard, scheme guard, read-only guard, secret redaction, origin label, token leakage, redirects) were each caught. Two mutants initially survived because my tests were too weak; I strengthened them and re-ran |
+| Endpoints | Checked against PayPal's API reference: sandbox host `api-m.sandbox.paypal.com`, `POST /v1/oauth2/token` (client credentials), `GET /v2/payments/captures/{capture_id}`, `GET /v2/checkout/orders/{id}`. A documentation match is not a live success |
+| Full suite after the change | **427 tests, OK, 0 failures/errors/skips**, ~52 s (400 original + 27 new) |
+| Guarded Phase 1 files, policy engine, evidence rules | **Untouched** (hash guard unchanged and passing) |
+| `PayPalSandboxSource` stub | Unchanged; its refusal test still passes |
+
+**Design (each point enforced by tests):** sandbox host only, `https` only, no redirects, no production URL in the code; only the OAuth `POST` and `GET`s of captures/orders, so it cannot create, capture, refund or change anything; credentials only from `PAYPAL_SANDBOX_CLIENT_ID` / `PAYPAL_SANDBOX_CLIENT_SECRET`, never stored, printed, saved, put in errors or in `repr()`; identifiers validated against injection; the raw body is preserved and parsed unchanged; `observed_at` is the real retrieval time; the adapter origin token is `SANDBOX` and the display label is `LIVE_SANDBOX`, so it cannot be confused with `FIXTURE`; opaque statuses are passed through verbatim and flagged as opaque; an Orders API shipping address stays an unverified observation and is never promoted to a Transaction Details address.
+
+**Deliberately not done (scope and risk):** wiring sandbox data into the web UI. Every page header carries a "Fixture data" badge, and changing that without a real response to test against risked the working demo. The sandbox read is therefore a command-line step. Once you have one real response, wiring it into the UI behind the existing origin labels is a reasonable follow-up.
+
+**Why this does not fully close the eligibility risk:** the code is unverified against the live service until you run it. See `docs/PAYPAL_SANDBOX.md` (run instructions, and a verification record to fill in from a real run) and `SUBMISSION_CHECKLIST.md`.

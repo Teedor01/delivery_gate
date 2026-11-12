@@ -66,7 +66,7 @@ The page header shows a **Fixture data** badge throughout: all payments are fixt
 | Screen is in an unexpected state mid-take | Overview → **Reset demo data**, then restart the sequence. |
 | After Reset the page still looks old | Hard-refresh (Ctrl/Cmd+Shift+R). |
 | A pasted document says it "cannot be read offline" | Expected: only the 15 built-in samples can be read without live extraction. Use the **Sample evidence library**. |
-| Values or fingerprints differ from this document | Confirm you are on the intended version, then run `python3 -m unittest discover -s tests -t .`. Expect 400 tests, OK. |
+| Values or fingerprints differ from this document | Confirm you are on the intended version, then run `python3 -m unittest discover -s tests -t .`. Expect 427 tests, OK. |
 | Server crashes or hangs | Ctrl+C, start again. State is in memory, so you lose nothing that matters. |
 | Windows: hash-guard test fails | Make sure the checkout kept LF line endings (`.gitattributes` enforces this on a fresh clone). |
 
@@ -80,4 +80,4 @@ Press **Ctrl+C** in the terminal running the server. There is nothing to clean u
 python3 -m unittest discover -s tests -t .
 ```
 
-Expected: `Ran 400 tests ... OK` in about 50 seconds. The 21 browser tests need Playwright and Chromium (`pip install playwright && playwright install chromium`); without them they skip.
+Expected: `Ran 427 tests ... OK` in about 50 seconds. The 21 browser tests need Playwright and Chromium (`pip install playwright && playwright install chromium`); without them they skip.
