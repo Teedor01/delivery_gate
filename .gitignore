@@ -38,3 +38,7 @@ traces/
 
 # Saved live-sandbox audit records (review before deciding to publish any)
 live_captures/
+
+# Live evaluation checkpoint cache and partial results
+eval/.live_cache/
+eval/results_live_partial.json

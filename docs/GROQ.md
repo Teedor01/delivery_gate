@@ -102,3 +102,26 @@ Verified against Groq's API reference on 2026-11-12:
 - Structured outputs and JSON mode: <https://console.groq.com/docs/structured-outputs>
 - Reasoning options (gpt-oss): <https://console.groq.com/docs/reasoning>
 - Live model list for your account: `GET https://api.groq.com/openai/v1/models`
+
+
+## Rate limits, retries and resumable live evaluation (Nov 12, 2026)
+
+Observed on a real run: `openai/gpt-oss-120b`, free-tier limit 8,000 tokens per minute, `rate_limit_exceeded` (HTTP 429) part-way through `eval.evaluate --live`.
+
+**Retry behaviour (`GroqExtractor`, `RetryPolicy`)**
+- HTTP 429: up to 6 total requests. Waits for `Retry-After` (seconds) plus up to 1s jitter; if the header is absent, uses the "try again in 7.2s" hint in Groq's error message; if neither, exponential backoff 2s, 4s, 8s... capped at 60s with up to +25% jitter. A server-requested wait over 120s is reported, not slept through.
+- HTTP 5xx and network errors: up to 3 total requests, exponential backoff.
+- 400, 401, 403, 404, malformed or truncated output: never retried (one request).
+- When retries run out the error says the HTTP status, Groq's error code and the attempt count.
+
+**Resumable evaluation**
+- `python3 -m eval.evaluate --live [--tpm 8000] [--cache-dir DIR] [--no-cache]`
+- Each successful extraction is saved to `eval/.live_cache/` (git-ignored), keyed by artifact hash, provider, model, reasoning effort, prompt hash and version, and a schema fingerprint. Any change to those is a cache miss. The validator always re-runs on cached text.
+- Progress lines say `CACHED` or `FRESH API call` per artifact, with done and remaining counts.
+- If any artifact fails, the run is INCOMPLETE: exit code 3, `eval/results_live_partial.json` lists completed, failed and not-attempted artifacts, no metrics are printed, and `eval/results_live.json` is not written. Failed artifacts are never cached or counted as passes. Authentication errors and exhausted 429 retries stop the run early; re-run the same command to resume.
+- `--tpm N` spaces fresh calls using the token usage Groq reports, to stay under a tokens-per-minute budget. Recommended: `--tpm 7000` on the 8,000 TPM tier.
+- `results_live.json` records `run.fresh_api_calls` and `run.cache_hits`. It is a live-model measurement and is never comparable to the recorded baseline in `results.json`.
+
+**Token use:** the system prompt (about 5 KB) is unchanged on purpose. Its hash is pinned to the recorded baseline outputs, so editing it would make that baseline stale and would change what is being evaluated. Savings come from not repeating calls (cache) and pacing.
+
+**Live results:** not recorded in this document. The assistant that wrote this change had no network access and no GROQ_API_KEY, so `groq_check --extract` and `eval.evaluate --live` were not run by it.

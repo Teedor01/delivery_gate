@@ -46,7 +46,7 @@ def _list_models(key: str, get=None) -> list:
 
 
 def main(argv: Optional[Sequence[str]] = None, env: Optional[Mapping[str, str]] = None, list_transport=None, extract_transport=None,
-         out: Optional[IO[str]] = None) -> int:
+         out: Optional[IO[str]] = None, sleep=None) -> int:
     out = out or sys.stdout
     env = os.environ if env is None else env
     ap = argparse.ArgumentParser(prog="python3 -m delivery_extraction.groq_check")
@@ -84,7 +84,7 @@ def main(argv: Optional[Sequence[str]] = None, env: Optional[Mapping[str, str]] 
         spec = next(x for x in ARTIFACTS if x["id"] == "A01")
         art = Artifact(spec["id"], spec["text"], spec["kind"])
         try:
-            ex = GroqExtractor(model=model, api_key=key, transport=extract_transport, reasoning_effort=(env.get("EXTRACTION_REASONING_EFFORT") or "low").strip().lower())
+            ex = GroqExtractor(model=model, api_key=key, transport=extract_transport, sleep=sleep, on_retry=lambda m: p('  ' + m), reasoning_effort=(env.get("EXTRACTION_REASONING_EFFORT") or "low").strip().lower())
             raw = ex.extract(art)
         except LLMError as e:
             p(f"EXTRACTION REQUEST FAILED: {e}")

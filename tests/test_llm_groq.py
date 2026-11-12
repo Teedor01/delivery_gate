@@ -32,6 +32,7 @@ def transport(reply, calls=None):
 
 
 def groq(model="openai/gpt-oss-120b", reply=RAW, calls=None, **kw):
+    kw.setdefault("sleep", lambda s: None)      # retries must never really sleep in unit tests
     return GroqExtractor(model=model, api_key=KEY, transport=transport(reply, calls), **kw)
 
 
@@ -259,7 +260,7 @@ class CheckCommand(unittest.TestCase):
             listed.append(key)
             return list_status, json.dumps({"object": "list", "data": [{"id": m} for m in models]}).encode()
         out = io.StringIO()
-        rc = groq_check.main(list(argv), env=self.ENV if env is None else env, list_transport=get, extract_transport=transport(extract_reply, extract_calls), out=out)
+        rc = groq_check.main(list(argv), env=self.ENV if env is None else env, list_transport=get, extract_transport=transport(extract_reply, extract_calls), out=out, sleep=lambda s: None)
         return rc, out.getvalue(), listed
 
     def test_missing_configuration_makes_no_request(self):

@@ -1,22 +1,27 @@
 """Extraction evaluation. TEST data only; no training anywhere. Run:  python -m eval.evaluate [--live]
 
+Live runs are resumable (eval/.live_cache) and rate-limit aware; see docs/GROQ.md.
 Default replays eval/recorded_outputs (produced by the assistant that wrote the gold; see MANIFEST.json), so the numbers measure
 the validator/bridge plumbing and the recorded outputs, NOT the accuracy of an independent model. `--live` uses the configured live extractor
 (Groq or Anthropic; needs a provider key and EXTRACTION_MODEL) for a real measurement.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
+import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from delivery_extraction.extractor import RecordedExtractor
+from delivery_extraction.extractor import RawExtraction, RecordedExtractor
+from delivery_extraction.llm import LLMError
 from delivery_extraction.pipeline import ExtractionRun, run_extraction
 from delivery_extraction.schema import Artifact, CandidateFact
+from eval.live_cache import LiveCache, cache_meta
 from eval.corpus import ADVERSARIAL_IDS, ARTIFACTS, CASE_GROUPS, EXPECTED_CONTRADICTIONS, GOLD
 
 # Thresholds proposed up front (they were not previously agreed; adjust deliberately, not after seeing results).
@@ -107,24 +112,114 @@ def run_recorded() -> ExtractionRun:
     return run_extraction(load_corpus(), RecordedExtractor(ROOT / "eval" / "recorded_outputs"), CASE_GROUPS)
 
 
-def main(argv: List[str]) -> int:
-    if "--live" in argv:
-        from delivery_extraction.llm import make_extractor
-        live = make_extractor()
-        if live is None:
-            print("no live extractor configured: set GROQ_API_KEY (or ANTHROPIC_API_KEY) and EXTRACTION_MODEL; see docs/GROQ.md")
-            return 2
-        run = run_extraction(load_corpus(), live, CASE_GROUPS)
-    else:
-        run = run_recorded()
+class _Prefetched:
+    """Serves already-collected raw outputs to run_extraction (so contradiction grouping runs once, over the complete set)."""
+    def __init__(self, raws: Dict[str, RawExtraction]):
+        self.raws = raws
+
+    def extract(self, artifact: Artifact) -> RawExtraction:
+        return self.raws[artifact.artifact_id]
+
+
+def collect_live(artifacts: Sequence[Artifact], live: Any, cache: Optional[LiveCache], say: Callable[[str], None], tpm: Optional[int] = None,
+                 sleep: Callable[[float], None] = time.sleep, clock: Callable[[], float] = time.monotonic) -> Dict[str, Any]:
+    """Extract every artifact, reusing cached successes. Never raises for a model failure: failures are recorded, not counted as passes.
+    Aborts the remaining artifacts on authentication/request errors and on exhausted rate-limit retries (more calls would only fail)."""
+    n = len(artifacts)
+    raws: Dict[str, RawExtraction] = {}
+    source: Dict[str, str] = {}
+    failed: List[Dict[str, Any]] = []
+    not_attempted: List[str] = []
+    effort = getattr(live, "reasoning_effort", "n/a")
+    abort = False
+    for i, a in enumerate(artifacts, 1):
+        aid = a.artifact_id
+        if abort:
+            not_attempted.append(aid)
+            continue
+        meta = cache_meta(a.sha256, live.KIND, live.model, effort)
+        hit = cache.get(meta) if cache else None
+        if hit is not None:
+            raws[aid], source[aid] = hit, "cache"
+            say(f"[{i}/{n}] {aid}: CACHED (no API call)   done {len(raws)}, remaining {n - len(raws) - len(failed)}")
+            continue
+        t0 = clock()
+        try:
+            raw = live.extract(a)
+        except LLMError as e:
+            failed.append({"artifact_id": aid, "error": str(e), "status": e.status, "attempts": e.attempts})
+            say(f"[{i}/{n}] {aid}: FAILED after {e.attempts} attempt(s): {e}")
+            if e.status in (400, 401, 403, 404) or (e.status == 429):
+                abort = True
+                say("stopping: further requests would fail the same way. Completed artifacts are saved; re-run to resume.")
+            continue
+        raws[aid], source[aid] = raw, "api"
+        if cache:
+            cache.put(meta, raw)
+        used = getattr(live, "last_usage_tokens", None)
+        say(f"[{i}/{n}] {aid}: FRESH API call ({getattr(live, 'last_attempts', 1)} request(s), {used if used is not None else '?'} tokens)   done {len(raws)}, remaining {n - len(raws) - len(failed)}")
+        if tpm and used and i < n:
+            sleep(max(0.0, used / tpm * 60 - (clock() - t0)))
+    return {"raws": raws, "source": source, "failed": failed, "not_attempted": not_attempted}
+
+
+def run_live_eval(argv_ns: argparse.Namespace, live: Any, out: Callable[[str], None]) -> int:
+    arts = load_corpus()
+    cache = None if argv_ns.no_cache else LiveCache(Path(argv_ns.cache_dir))
+    got = collect_live(arts, live, cache, out, argv_ns.tpm)
+    fresh, cached = sum(v == "api" for v in got["source"].values()), sum(v == "cache" for v in got["source"].values())
+    complete = len(got["raws"]) == len(arts)
+    if not complete:
+        part = {"mode": "LIVE", "complete": False, "model": live.model, "expected_artifacts": len(arts), "completed": sorted(got["raws"]),
+                "failed": got["failed"], "not_attempted": got["not_attempted"], "fresh_api_calls": fresh, "cache_hits": cached,
+                "note": "PARTIAL: no metrics are reported and nothing here counts as a pass."}
+        (ROOT / "eval" / "results_live_partial.json").write_text(json.dumps(part, indent=2))
+        out(f"\nINCOMPLETE LIVE EVALUATION: {len(got['raws'])}/{len(arts)} artifacts extracted, {len(got['failed'])} failed, {len(got['not_attempted'])} not attempted.")
+        out("No metrics are reported for a partial run. Re-run the same command to resume (completed artifacts are cached).")
+        return 3
+    run = run_extraction(arts, _Prefetched(got["raws"]), CASE_GROUPS)
     res = evaluate(run)
-    (ROOT / "eval" / ("results_live.json" if "--live" in argv else "results.json")).write_text(json.dumps(res, indent=2))
-    print(f"extractor: {res['extractor_kinds']}   artifacts: {res['artifact_count']}   counts: {res['counts']}")
+    res["run"] = {"mode": "LIVE", "complete": True, "model": live.model, "fresh_api_calls": fresh, "cache_hits": cached,
+                  "per_artifact_source": got["source"], "note": "Live-model measurement. Not comparable to the recorded baseline in results.json."}
+    (ROOT / "eval" / "results_live.json").write_text(json.dumps(res, indent=2))
+    (ROOT / "eval" / "results_live_partial.json").unlink(missing_ok=True)
+    return _report(res, out, f"LIVE ({fresh} fresh API call(s), {cached} from cache)")
+
+
+def _report(res: Dict[str, Any], out: Callable[[str], None], label: str) -> int:
+    out(f"extractor: {res['extractor_kinds']}   artifacts: {res['artifact_count']}   mode: {label}   counts: {res['counts']}")
     for k, v in res["metrics"].items():
-        print(f"  {k:30s} {v!s:8s} (needs {res['thresholds'][k]})  {'PASS' if res['pass'][k] else 'FAIL'}")
-    print("ALL PASS" if res["all_pass"] else "FAILURES PRESENT")
+        out(f"  {k:30s} {v!s:8s} (needs {res['thresholds'][k]})  {'PASS' if res['pass'][k] else 'FAIL'}")
+    out("ALL PASS" if res["all_pass"] else "FAILURES PRESENT")
     return 0 if res["all_pass"] else 1
 
 
+def main(argv: Optional[Sequence[str]] = None, env=None, live_factory=None, out: Callable[[str], None] = print) -> int:
+    ap = argparse.ArgumentParser(prog="python3 -m eval.evaluate", description="Extraction evaluation. Default: replay the recorded outputs (no network). --live: real model.")
+    ap.add_argument("--live", action="store_true", help="use the configured live extractor (GROQ_API_KEY + EXTRACTION_MODEL); resumable")
+    ap.add_argument("--cache-dir", default=str(ROOT / "eval" / ".live_cache"), help="checkpoint directory for successful live extractions")
+    ap.add_argument("--no-cache", action="store_true", help="neither read nor write the checkpoint cache")
+    ap.add_argument("--tpm", type=int, default=None, help="pace fresh calls to stay under this tokens-per-minute budget (e.g. 8000)")
+    a = ap.parse_args(list(sys.argv[1:] if argv is None else argv))
+    if a.tpm is not None and a.tpm <= 0:
+        ap.error("--tpm must be positive")
+    if a.live:
+        from delivery_extraction.llm import GroqExtractor, make_extractor
+        try:
+            live = (live_factory or make_extractor)(env)
+        except LLMError as e:
+            out(f"live extractor configuration error: {e}")
+            return 2
+        if live is None:
+            out("no live extractor configured: set GROQ_API_KEY (or ANTHROPIC_API_KEY) and EXTRACTION_MODEL; see docs/GROQ.md")
+            return 2
+        if isinstance(live, GroqExtractor):
+            live.on_retry = lambda m: out("  " + m)
+        return run_live_eval(a, live, out)
+    res = evaluate(run_recorded())
+    (ROOT / "eval" / "results.json").write_text(json.dumps(res, indent=2))
+    return _report(res, out, "RECORDED")
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
