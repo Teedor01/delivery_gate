@@ -78,7 +78,7 @@ PayPal API status values (for example `seller_protection.status`) are kept as op
 
 ## 6. Requirements and installation
 
-- **Python 3.12** (developed and tested on 3.12.3). The application and the 406 non-browser tests use the **standard library only**: no `pip install` is needed to run the app.
+- **Python 3.12** (developed and tested on 3.12.3). The application and the 446 non-browser tests use the **standard library only**: no `pip install` is needed to run the app.
 - **Optional, for the 21 browser tests:** `pip install playwright` then `playwright install chromium`. Without Playwright those tests skip automatically.
 
 ```bash
@@ -90,14 +90,15 @@ cd delivery-gate
 
 None is required. Offline, the app reads the **15 built-in sample documents** from recorded extraction outputs and runs entirely on fixtures.
 
-To enable live extraction of arbitrary pasted text, set **both** variables in the server's environment (see `.env.example`; the app does not load `.env` files itself):
+To enable live extraction of arbitrary pasted text, set a provider key **and** a model in the server's environment (see `.env.example`; the app does not load `.env` files itself). **Groq is the recommended provider** (`docs/GROQ.md`):
 
 ```bash
-export ANTHROPIC_API_KEY="your-key"
-export EXTRACTION_MODEL="a-model-you-have-access-to"
+export GROQ_API_KEY="your-groq-key"
+export EXTRACTION_MODEL="openai/gpt-oss-120b"   # no default is built in; Groq retires models often
+python3 -m delivery_extraction.groq_check --extract   # pre-flight: confirms the model is available, runs one real extraction
 ```
 
-The key is read server-side only and is never sent to the browser. **The live path has been tested only with an injected stand-in model, never against a real one.**
+The key is read server-side only and is never sent to the browser. Anthropic remains supported as an alternative (`ANTHROPIC_API_KEY`). **The live path (Groq or Anthropic) has been tested only with a mocked transport, never against a real model; run the pre-flight command above to test it yourself.**
 
 ## 8. Run the application
 
@@ -113,7 +114,7 @@ Open <http://127.0.0.1:8080>. State is in memory and resets when the server rest
 python3 -m unittest discover -s tests -t .
 ```
 
-Expected: **427 tests** (248 from Phases 1–3, 152 UI tests, 27 sandbox-client tests), about 50 seconds. `tests/phase1_engine_hashes.json` pins the engine, registry, policy and schema files; a failure there means one of them changed and needs review.
+Expected: **467 tests** (248 from Phases 1–3, 152 UI tests, 27 sandbox-client tests, 40 Groq tests), about 50 seconds. `tests/phase1_engine_hashes.json` pins the engine, registry, policy and schema files; a failure there means one of them changed and needs review.
 
 ## 10. Run the demo
 
@@ -157,10 +158,10 @@ Follow [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the exact click-by-click sequenc
 |---|---|
 | `delivery_gate/` | Policy models, rule registry, deterministic engine (Phase 1) |
 | `policy/`, `schemas/` | Rule definitions, cited source passages, JSON schemas |
-| `delivery_extraction/`, `eval/` | Evidence extraction, validation, review bridge; evaluation corpus (Phase 2) |
+| `delivery_extraction/`, `eval/` | Evidence extraction, validation, review bridge; evaluation corpus (Phase 2); Groq/Anthropic live extractors and the `groq_check` pre-flight command |
 | `paypal_adapter/`, `fixtures/paypal/` | PayPal observation adapter and fixtures (Phase 3); read-only sandbox client and `sandbox_check` command (Phase 5) |
 | `delivery_ui/` | Browser application: server, presenter, renderer, fixtures (Phase 4) |
-| `tests/` | 427 tests |
+| `tests/` | 467 tests |
 | `docs/` | Phase reports (`PHASE1`–`PHASE4`) and screenshots |
 | `tools/` | Walkthrough and fixture-building scripts |
 

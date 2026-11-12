@@ -157,3 +157,27 @@ Also verified: zero console errors, CSP violations or failed requests across ~48
 **Deliberately not done (scope and risk):** wiring sandbox data into the web UI. Every page header carries a "Fixture data" badge, and changing that without a real response to test against risked the working demo. The sandbox read is therefore a command-line step. Once you have one real response, wiring it into the UI behind the existing origin labels is a reasonable follow-up.
 
 **Why this does not fully close the eligibility risk:** the code is unverified against the live service until you run it. See `docs/PAYPAL_SANDBOX.md` (run instructions, and a verification record to fill in from a real run) and `SUBMISSION_CHECKLIST.md`.
+
+## 11. Addendum: Groq as the live extraction provider (Nov 12, 2026)
+
+**Request:** make Groq the AI provider instead of Anthropic, using Groq's current models and API so there are no surprises later.
+
+| Item | Result |
+|---|---|
+| Groq docs checked (models, deprecations, API reference, structured outputs, reasoning) | Read on 2026-11-12; sources listed in `docs/GROQ.md` §6 |
+| `GroqExtractor` + `make_extractor` (provider selection) | Implemented in `delivery_extraction/llm.py`; Anthropic path unchanged and still selectable |
+| Pre-flight command `python3 -m delivery_extraction.groq_check [--extract]` | Implemented: asks Groq which models the account can use, checks the configured one, optionally runs ONE real extraction through the strict validator |
+| Mocked tests | 40 new tests, all pass; 9 sabotage checks (reasoning params to wrong models, deprecated `max_tokens`, JSON mode dropped, truncation ignored, key leaked in errors, retired-model hint removed, provider precedence, key in `repr`, guessed default model) each caught |
+| Full suite | **467 tests** (427 + 40), see the final verification line below |
+| **Real request to Groq** | **NOT performed** (no key, no network in the build environment). Live extraction is therefore still **unverified** |
+| Policy engine, evidence rules, validator, hash guard | Untouched |
+
+**Findings that shaped the design (all from Groq's own pages, dated 2026-11-12):**
+- `llama-3.3-70b-versatile` and `llama-3.1-8b-instant`, the models most tutorials use, were **retired for standard accounts on 2026-08-16**; `qwen/qwen3.6-27b` on 2026-09-14; `groq/compound*` on 2026-09-21. The current Production models are **`openai/gpt-oss-120b`** and **`openai/gpt-oss-20b`**.
+- Groq retires models often (seven retirement dates in 2026), so **no default model is built in**: `EXTRACTION_MODEL` is required and a retired ID produces an error naming Groq's replacement.
+- The gpt-oss models are reasoning models: reasoning tokens count against the output limit, so the request uses a generous limit, `reasoning_effort: low`, `include_reasoning: false`, and truncation is reported as an error instead of passing on a cut-off answer.
+- JSON Object mode is used rather than schema-enforced structured outputs: a Groq community report describes the schema being ignored on gpt-oss-120b, and our strict validator is the authority regardless.
+
+**Behaviour change to be aware of:** if `GROQ_API_KEY` is set and `EXTRACTION_PROVIDER` is not, Groq is chosen even when an Anthropic key is also present. Built-in samples still replay recorded outputs, so the demo remains deterministic.
+
+**Unresolved:** live Groq behaviour (rate limits on free tier, a possible difference from the documented request format, extraction quality) is unknown until `groq_check --extract` is run with a real key.

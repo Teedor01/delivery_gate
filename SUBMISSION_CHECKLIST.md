@@ -11,7 +11,7 @@ Legend: ✅ done and verified by me · ☐ you must do this · ⚠️ risk you s
 These are findings, not criticisms. Phase 5's scope forbade new features and live PayPal calls, so I have not changed any of this.
 
 1. **PayPal sandbox integration: built, but NOT yet proven with a real call. This is the one thing that can still change your eligibility.** Devpost says the project should integrate the PayPal developer platform *using the free sandbox environment*, with PayPal integration *central*. A read-only sandbox client and command now exist (`python3 -m paypal_adapter.sandbox_check`, guide in `docs/PAYPAL_SANDBOX.md`), tested with 27 mocked tests. **I could not make a real request**: my environment had no sandbox credentials and no network. Until you run it with your own sandbox credentials and it returns `HTTP 200`, it is unverified code, and the README, Devpost text and video must not claim otherwise. Still true after this work: the web UI shows fixture data only, and the sandbox tool is a command-line step, not a UI feature. **Your action (about 15 minutes): follow `docs/PAYPAL_SANDBOX.md` section 3, then fill in section 4 with the real result.** If the call fails, send me the printed error (it never contains secrets) and I will fix it. If you cannot get it working in time, submit with the honest wording in the Devpost draft and accept the risk.
-2. **AI use is recorded offline.** In the zero-setup demo, extraction output is *recorded*, not produced live. The live path (`ANTHROPIC_API_KEY` + `EXTRACTION_MODEL`) exists but has only been tested with an injected stand-in, never against a real model. Say so in the Devpost text. If you can, run one live extraction yourself before the video and only then describe it as working.
+2. **AI use is recorded offline unless you configure Groq.** In the zero-setup demo, extraction output is *recorded*, not produced live. The live path now uses **Groq** (`docs/GROQ.md`) but has only been tested with a mocked transport, never a real model. **Your action (about 5 minutes): set `GROQ_API_KEY` and `EXTRACTION_MODEL=openai/gpt-oss-120b`, run `python3 -m delivery_extraction.groq_check --extract`, and only then describe live AI extraction as working.** Run `python3 -m delivery_extraction.groq_check` again right before recording: Groq retires models often and this catches it. The demo's built-in samples intentionally stay on recorded outputs, so the video is deterministic. Say so honestly.
 3. **"Functional demo" requirement.** A judge must be able to run it from the repo instructions. This works from a fresh clone (verified), **provided the repository is published with all files** (see "Repository" below). Do not publish the *original* repository: its committed state is incomplete and broken.
 4. **Third-party marks in the video.** The rules prohibit third-party trademarks or copyrighted material without permission. The demo shows the PayPal name and a *sample FedEx notification*. Naming a product to describe what it does is normal, but if you want to be conservative, consider noting "sample carrier email" in narration instead of "FedEx", and use no logos or music. This is your judgment call.
 5. **Disclaimer wording.** The README says the project is not endorsed by or affiliated with PayPal. Keep that in the Devpost text too.
@@ -38,11 +38,11 @@ These are findings, not criticisms. Phase 5's scope forbade new features and liv
 
 | | Item |
 |---|---|
-| ✅ | `python3 -m unittest discover -s tests -t .` → 427 tests (400 + 27 sandbox-client tests), 0 failures, 0 errors, 0 skipped (~52 s) |
+| ✅ | `python3 -m unittest discover -s tests -t .` → 467 tests (400 + 27 sandbox-client + 40 Groq tests), 0 failures, 0 errors, 0 skipped (~52 s) |
 | ✅ | `python3 -m delivery_ui --port 8080` starts; main pages load |
 | ✅ | 27-check browser verification in Chromium (full DG-20481 workflow, reset, console, links, overflow, key-leak, claims): all pass |
 | ☐ | **Run the PayPal sandbox check once with your own sandbox credentials and record the result in `docs/PAYPAL_SANDBOX.md` section 4** | you |
-| ☐ | Optional: run `python -m eval.evaluate --live` once with your own key and model, and record the summary | you |
+| ☐ | Run `python3 -m delivery_extraction.groq_check --extract` with your Groq key (see `docs/GROQ.md`); optionally `python -m eval.evaluate --live`; record the results | you |
 | ☐ | Re-run both commands once more on **your** machine after cloning from the new public URL, ideally on a second OS if you can |
 
 ## Demo video (YouTube)
@@ -63,7 +63,7 @@ These are findings, not criticisms. Phase 5's scope forbade new features and liv
 |---|---|
 | ☐ | Project name: Delivery Gate |
 | ☐ | Text description (draft below) |
-| ☐ | Tools used: PayPal developer platform (documented API shapes; fixtures only), an AI model via the Anthropic Messages API for evidence extraction (live path unevaluated). Explain how each is used, honestly |
+| ☐ | Tools used: PayPal developer platform (documented API shapes validated on fixtures, plus a read-only sandbox client that has not yet been run live; state which is true at submission time), an LLM served by Groq (openai/gpt-oss-120b recommended) for evidence extraction; the offline demo replays recorded extractions and the live path is unevaluated. Explain how each is used, honestly |
 | ☐ | Repository URL: `____________________` |
 | ☐ | Screenshots: use files in `docs/screens/` or capture fresh ones |
 | ☐ | Final review of every field, then **Submit** before the deadline. Submit early; do not leave it to the last hour |
@@ -74,7 +74,7 @@ These are findings, not criticisms. Phase 5's scope forbade new features and liv
 >
 > **How it works.** AI extracts evidence from documents into a small closed set of facts, each tied to the exact source text. Validation checks the output. A deterministic engine, not the AI, evaluates the facts against the requirements currently modeled. A human reviewer must attest to new evidence before it counts, and an attestation produces "Reviewed", never "Verified". A "what changes?" view re-runs the same engine on hypothetical evidence, clearly labelled hypothetical. Delivery Gate never says a seller is protected and never predicts a win: PayPal makes the final decision.
 >
-> **Honest status.** This is a prototype. The web app runs on fixture data. The PayPal adapter is built against PayPal's documented API response shapes and tested on fixtures. [CHOOSE ONE AND DELETE THIS BRACKET. IF you have run the sandbox check successfully: "A read-only sandbox client retrieved a real PayPal sandbox capture on <date>." OTHERWISE: "A read-only sandbox client exists and is tested with mocked HTTP; it has not yet been run against the live sandbox."] The offline demo reads recorded AI extractions; the live extraction path has not been evaluated for accuracy. Built with Python's standard library, 427 automated tests, Apache-2.0.
+> **Honest status.** This is a prototype. The web app runs on fixture data. The PayPal adapter is built against PayPal's documented API response shapes and tested on fixtures. [CHOOSE ONE AND DELETE THIS BRACKET. IF you have run the sandbox check successfully: "A read-only sandbox client retrieved a real PayPal sandbox capture on <date>." OTHERWISE: "A read-only sandbox client exists and is tested with mocked HTTP; it has not yet been run against the live sandbox."] The offline demo reads recorded AI extractions; the live extraction path has not been evaluated for accuracy. Built with Python's standard library, 467 automated tests, Apache-2.0.
 >
 > Not affiliated with or endorsed by PayPal.
 

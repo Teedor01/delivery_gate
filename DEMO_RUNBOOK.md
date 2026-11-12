@@ -15,7 +15,7 @@ Expected terminal output: `Delivery Gate demo UI on http://127.0.0.1:8080  (fixt
 
 Open **http://127.0.0.1:8080** in the browser.
 
-**Environment variables:** none required. Optional (live extraction only): `ANTHROPIC_API_KEY` **and** `EXTRACTION_MODEL`, both set before starting the server. Leave them **unset for the demo**; the demo needs no API key and works fully offline. See `.env.example`.
+**Environment variables:** none required. Optional (live extraction only): `GROQ_API_KEY` **and** `EXTRACTION_MODEL` (for example `openai/gpt-oss-120b`), both set before starting the server; run `python3 -m delivery_extraction.groq_check` first to confirm the model is available (details in `docs/GROQ.md`). Leave them **unset for the demo**; the demo needs no API key and works fully offline. See `.env.example`.
 
 **Different port:** `python3 -m delivery_ui --port 8090`, then use that port in the URL.
 
@@ -66,7 +66,7 @@ The page header shows a **Fixture data** badge throughout: all payments are fixt
 | Screen is in an unexpected state mid-take | Overview → **Reset demo data**, then restart the sequence. |
 | After Reset the page still looks old | Hard-refresh (Ctrl/Cmd+Shift+R). |
 | A pasted document says it "cannot be read offline" | Expected: only the 15 built-in samples can be read without live extraction. Use the **Sample evidence library**. |
-| Values or fingerprints differ from this document | Confirm you are on the intended version, then run `python3 -m unittest discover -s tests -t .`. Expect 427 tests, OK. |
+| Values or fingerprints differ from this document | Confirm you are on the intended version, then run `python3 -m unittest discover -s tests -t .`. Expect 467 tests, OK. |
 | Server crashes or hangs | Ctrl+C, start again. State is in memory, so you lose nothing that matters. |
 | Windows: hash-guard test fails | Make sure the checkout kept LF line endings (`.gitattributes` enforces this on a fresh clone). |
 
@@ -80,4 +80,4 @@ Press **Ctrl+C** in the terminal running the server. There is nothing to clean u
 python3 -m unittest discover -s tests -t .
 ```
 
-Expected: `Ran 427 tests ... OK` in about 50 seconds. The 21 browser tests need Playwright and Chromium (`pip install playwright && playwright install chromium`); without them they skip.
+Expected: `Ran 467 tests ... OK` in about 50 seconds. The 21 browser tests need Playwright and Chromium (`pip install playwright && playwright install chromium`); without them they skip.

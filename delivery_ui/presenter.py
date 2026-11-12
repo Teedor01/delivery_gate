@@ -344,7 +344,7 @@ def artifact_view(an: Analysis, aid: str) -> Dict[str, Any]:
             "source_label": rec.source_label, "added_at": when(rec.added_at), "added_at_iso": rec.added_at, "text": rec.artifact.text, "extraction_status": rec.status,
             "extraction_message": rec.message, "extractor_kind": rec.extractor_kind,
             "extractor_note": ("Replayed from a recorded extraction. No live model was called." if rec.extractor_kind == "RECORDED_ASSISTANT_OUTPUT"
-                               else ("Read by the configured extraction model." if rec.extractor_kind == "ANTHROPIC_API" else None)),
+                               else ("Read by the configured extraction model." if rec.extractor_kind in ("ANTHROPIC_API", "GROQ_API") else None)),
             "facts": facts, "fact_count": len(facts), "rejected_count": len(rec.rejected), "authenticity": auth, "chip": chip,
             "in_conflict": conflict, "reviews": [{**x, "at_text": when(x["at"])} for x in log], "is_sample": rec.recognized_sample, "fixture": rec.fixture, "steps": steps,
             "can_attest": rec.artifact.declared_kind in ("CARRIER_EMAIL", "TRACKING_PASTE"), "sha256": rec.artifact.sha256,

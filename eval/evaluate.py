@@ -1,8 +1,8 @@
 """Extraction evaluation. TEST data only; no training anywhere. Run:  python -m eval.evaluate [--live]
 
 Default replays eval/recorded_outputs (produced by the assistant that wrote the gold; see MANIFEST.json), so the numbers measure
-the validator/bridge plumbing and the recorded outputs, NOT the accuracy of an independent model. `--live` uses AnthropicExtractor
-(needs ANTHROPIC_API_KEY and EXTRACTION_MODEL) for a real measurement.
+the validator/bridge plumbing and the recorded outputs, NOT the accuracy of an independent model. `--live` uses the configured live extractor
+(Groq or Anthropic; needs a provider key and EXTRACTION_MODEL) for a real measurement.
 """
 from __future__ import annotations
 
@@ -109,8 +109,12 @@ def run_recorded() -> ExtractionRun:
 
 def main(argv: List[str]) -> int:
     if "--live" in argv:
-        from delivery_extraction.llm import AnthropicExtractor
-        run = run_extraction(load_corpus(), AnthropicExtractor(), CASE_GROUPS)
+        from delivery_extraction.llm import make_extractor
+        live = make_extractor()
+        if live is None:
+            print("no live extractor configured: set GROQ_API_KEY (or ANTHROPIC_API_KEY) and EXTRACTION_MODEL; see docs/GROQ.md")
+            return 2
+        run = run_extraction(load_corpus(), live, CASE_GROUPS)
     else:
         run = run_recorded()
     res = evaluate(run)

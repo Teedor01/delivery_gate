@@ -71,10 +71,13 @@ observed_at   : <the real UTC retrieval time>
 
 ## 5. Live AI extraction check (also not yet run)
 
-Needs `ANTHROPIC_API_KEY` and `EXTRACTION_MODEL` (no model name is defaulted or guessed) in the environment:
+Live extraction now uses **Groq** by default; see `docs/GROQ.md` for the model guidance and the full procedure. In short:
 
 ```bash
-python -m eval.evaluate --live
+export GROQ_API_KEY="..."
+export EXTRACTION_MODEL="openai/gpt-oss-120b"
+python3 -m delivery_extraction.groq_check --extract    # confirms the model is available, then runs ONE real extraction through the strict validator
+python3 -m eval.evaluate --live                        # optional: all 15 artifacts; writes eval/results_live.json
 ```
 
-This sends the 15 evaluation artifacts to the configured model and passes every result through the existing validator and review bridge, writing `eval/results_live.json`. Record the printed summary here **after** running it. Remember the standing caveat: the earlier recorded-output evaluation measured the pipeline, not a live model.
+Record the printed result in `docs/GROQ.md` or here **after** running it. Remember the standing caveat: the earlier recorded-output evaluation measured the pipeline, not a live model.

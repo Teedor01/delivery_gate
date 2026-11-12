@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from delivery_extraction import bridge, contradictions
 from delivery_extraction.extractor import RecordedExtractor
-from delivery_extraction.llm import AnthropicExtractor, LLMError
+from delivery_extraction.llm import LLMError, make_extractor
 from delivery_extraction.pipeline import ArtifactResult, run_extraction
 from delivery_extraction.review import Attestation, ReviewAction, ReviewDecision, ReviewError
 from delivery_extraction.schema import ARTIFACT_KINDS, FACT_VOCAB, UNKNOWN, Artifact, CandidateFact
@@ -58,11 +58,12 @@ def default_extractor_factory(artifact: Artifact, recognized_id: Optional[str]):
     """-> (extractor | None, extractor_kind | None, unavailable_message | None). Server-side only; keys never reach the browser."""
     if recognized_id:
         return RecordedExtractor(RECORDED_DIR), RecordedExtractor.KIND, None
-    if os.environ.get("EXTRACTION_MODEL") and os.environ.get("ANTHROPIC_API_KEY"):
-        try:
-            return AnthropicExtractor(), AnthropicExtractor.KIND, None
-        except LLMError as e:
-            return None, None, str(e)
+    try:
+        live = make_extractor(os.environ)
+    except LLMError as e:
+        return None, None, str(e)
+    if live is not None:
+        return live, live.KIND, None
     return None, None, ("No extraction model is configured in this environment, so this text could not be read automatically. "
                         "Only the built-in sample evidence can be read offline.")
 
