@@ -247,3 +247,64 @@ class ModelFailureInjection(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NewGroundingRegressions(unittest.TestCase):
+    def test_unknown_status_requires_delivery_language(self):
+        a = art("The customer sent a message.")
+        rep = validate_output(a, mk_out(a, [mk_fact(a, normalized_value="UNKNOWN", ambiguity=True,
+            value="maybe", source_span="The customer sent a message.")]))
+        self.assertIn("UNGROUNDED_UNKNOWN_FACT", reasons_of(rep))
+
+    def test_vague_got_there_is_grounded_but_not_delivered(self):
+        a = art("It got there around the 20th I guess.", aid="A15", kind="MERCHANT_STATEMENT")
+        fact = mk_fact(a, value="got there", normalized_value="UNKNOWN", source_span="It got there around the 20th I guess.",
+                       ambiguity=True, ambiguity_note="uncertain delivery wording", modality="HEDGED",
+                       attribution="MERCHANT_STATEMENT")
+        rep = validate_output(a, mk_out(a, [fact]))
+        self.assertEqual(len(rep.accepted), 1)
+        self.assertEqual(rep.accepted[0].normalized_value, "UNKNOWN")
+
+    def test_order_reference_hash_is_preserved_but_normalized_away(self):
+        a = art("I shipped order #A-1042.", aid="A04", kind="MERCHANT_STATEMENT")
+        fact = mk_fact(a, fact="order_reference", value="#A-1042", normalized_value="A-1042",
+                       source_span="order #A-1042", entity_ref="A-1042",
+                       attribution="MERCHANT_STATEMENT")
+        rep = validate_output(a, mk_out(a, [fact]))
+        self.assertEqual(len(rep.accepted), 1)
+
+    def test_noncanonical_order_reference_is_rejected(self):
+        a = art("I shipped order #A-1042.", aid="A04", kind="MERCHANT_STATEMENT")
+        fact = mk_fact(a, fact="order_reference", value="#A-1042", normalized_value="#A-1042",
+                       source_span="order #A-1042", entity_ref="#A-1042",
+                       attribution="MERCHANT_STATEMENT")
+        rep = validate_output(a, mk_out(a, [fact]))
+        self.assertIn("ORDER_REFERENCE_NOT_CANONICAL", reasons_of(rep))
+
+    def test_merchant_artifact_cannot_claim_carrier_authorship(self):
+        a = art("The tracking page shows it was delivered.", aid="A13", kind="MERCHANT_STATEMENT")
+        fact = mk_fact(a, source_span="The tracking page shows it was delivered.",
+                       attribution="CARRIER_STATEMENT")
+        rep = validate_output(a, mk_out(a, [fact]))
+        self.assertIn("CARRIER_ATTRIBUTION_ON_NON_CARRIER_ARTIFACT", reasons_of(rep))
+
+
+    def test_a07_weekday_only_delivery_date_remains_unknown(self):
+        a = art("FedEx tracking says delivered Tuesday at 14:32.", aid="A07", kind="MERCHANT_STATEMENT")
+        fact = mk_fact(a, fact="delivery_date", value="Tuesday", normalized_value="UNKNOWN",
+                       source_span="Tuesday", ambiguity=True, ambiguity_note="weekday without calendar date",
+                       attribution="MERCHANT_STATEMENT", modality="REPORTED")
+        rep = validate_output(a, mk_out(a, [fact]))
+        self.assertEqual(len(rep.accepted), 1)
+        self.assertEqual(rep.accepted[0].normalized_value, "UNKNOWN")
+
+    def test_a12_each_order_reference_has_its_own_canonical_entity(self):
+        a = art("Order A-2001: UPS tracking. Order A-2002: UPS tracking.", aid="A12", kind="MERCHANT_STATEMENT")
+        facts = [
+            mk_fact(a, fact="order_reference", value="A-2001", normalized_value="A-2001",
+                    source_span="Order A-2001", entity_ref="A-2001", attribution="MERCHANT_STATEMENT"),
+            dict(mk_fact(a, fact="order_reference", value="A-2002", normalized_value="A-2002",
+                         source_span="Order A-2002", entity_ref="A-2002", attribution="MERCHANT_STATEMENT"), fact_id="f2"),
+        ]
+        rep = validate_output(a, mk_out(a, facts))
+        self.assertEqual([f.entity_ref for f in rep.accepted], ["A-2001", "A-2002"])

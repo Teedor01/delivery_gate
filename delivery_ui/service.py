@@ -3,6 +3,9 @@ from __future__ import annotations
 import copy
 import json
 import os
+import pickle
+import sqlite3
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -102,6 +105,8 @@ class TransactionState:
     merchant: Dict[str, Any] = field(default_factory=dict)
     entity_ref: Optional[str] = None
     next_upload: int = 1
+    external_paypal: Optional[Dict[str, Any]] = None
+    validation_snapshot: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -144,12 +149,18 @@ class WhatIfResult:
 # ---- service ----------------------------------------------------------------------------------------------------------------
 class DeliveryGateService:
     def __init__(self, fixture_path: Path = FIXTURE_PATH, extractor_factory: ExtractorFactory = default_extractor_factory,
-                 clock: Optional[Callable[[], datetime]] = None, registry=None, assess_fn: Callable = assess):
+                 clock: Optional[Callable[[], datetime]] = None, registry=None, assess_fn: Callable = assess, db_path=None):
         self.registry = registry or default_registry()
         self._factory = extractor_factory
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._assess = assess_fn                                    
         self._doc = json.loads(Path(fixture_path).read_text())
+        configured_db = db_path or os.environ.get("DELIVERY_GATE_CASE_DB")
+        if not configured_db:
+            configured_db = Path(tempfile.mkstemp(prefix="delivery-gate-service-", suffix=".sqlite3")[1])
+        self.db_path = Path(configured_db)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._init_persistence()
         self.merchant_name = self._doc["merchant"]["name"]
         self._corpus = corpus_index()
         self._corpus_by_id = {a["id"]: a for a in CORPUS}
@@ -175,6 +186,34 @@ class DeliveryGateService:
                 r = a.get("review")
                 if r:
                     self._review(st, a["artifact_id"], r["mode"], r["reviewer"], "Demo fixture review", r["at"], fixture=True)
+        self._restore_live_states()
+
+    def _init_persistence(self) -> None:
+        with sqlite3.connect(str(self.db_path), timeout=15) as db:
+            db.execute("PRAGMA journal_mode=WAL")
+            db.execute("CREATE TABLE IF NOT EXISTS assessment_states (case_id TEXT PRIMARY KEY, state_blob BLOB NOT NULL, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)")
+
+    def _restore_live_states(self) -> None:
+        with sqlite3.connect(str(self.db_path), timeout=15) as db:
+            rows = db.execute("SELECT case_id, state_blob FROM assessment_states").fetchall()
+        for case_id, blob in rows:
+            try:
+                state = pickle.loads(blob)
+            except Exception as exc:
+                raise RuntimeError(f"Persisted assessment {case_id} could not be restored") from exc
+            if isinstance(state, TransactionState) and state.ref == case_id and state.external_paypal:
+                self.states[case_id] = state
+
+    def _persist_state(self, state: TransactionState, invalidate: bool = True) -> None:
+        if not state.external_paypal:
+            return
+        if invalidate:
+            state.validation_snapshot = None
+        blob = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
+        with sqlite3.connect(str(self.db_path), timeout=15) as db:
+            db.execute("INSERT INTO assessment_states(case_id,state_blob,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) "
+                       "ON CONFLICT(case_id) DO UPDATE SET state_blob=excluded.state_blob, updated_at=CURRENT_TIMESTAMP",
+                       (state.ref, sqlite3.Binary(blob)))
 
     def _state(self, ref: str) -> TransactionState:
         if ref not in self.states:
@@ -184,10 +223,48 @@ class DeliveryGateService:
     def refs(self) -> List[str]:
         return list(self.states)
 
+    def register_paypal_case(self, case_id: str, order_record: Dict[str, Any]) -> TransactionState:
+        """Register a live PayPal order as a distinct assessment case; payment data stays separate from delivery evidence."""
+        if case_id in self.states:
+            st = self.states[case_id]
+            if st.external_paypal and st.external_paypal.get("order_id") != order_record.get("order_id"):
+                raise ServiceError("case_conflict", "Assessment case is already linked to another PayPal order.")
+            st.external_paypal = copy.deepcopy(order_record)
+            st.fixture["paypal_order"] = copy.deepcopy(order_record.get("order") or {})
+            st.fixture["order_ref"] = order_record.get("order_id")
+            self._persist_state(st)
+            return st
+        template = copy.deepcopy(self._doc["transactions"][0])
+        template["ref"] = case_id
+        template["order_ref"] = order_record.get("order_id")
+        template["paypal_order"] = copy.deepcopy(order_record.get("order") or {})
+        template["paypal_dispute"] = None
+        # No fixture merchant assertions or address are carried into a real order.
+        template["merchant_provided"] = {"country": None, "transaction_details_address": {}, "answers": {
+            "redirect_detected": None, "response_to_paypal": None, "shipped_after_advised_not_to_release": None},
+            "physical_goods": None, "pre_order_or_made_to_order": None}
+        mp = template["merchant_provided"]
+        st = TransactionState(case_id, template, merchant={"country": None, "address": {}, "answers": dict(mp["answers"]),
+            "physical_goods": None, "pre_order_or_made_to_order": None}, external_paypal=copy.deepcopy(order_record))
+        self.states[case_id] = st
+        self._persist_state(st)
+        return st
+
+    def update_paypal_case(self, case_id: str, order_record: Dict[str, Any]) -> None:
+        st = self._state(case_id)
+        if not st.external_paypal or st.external_paypal.get("order_id") != order_record.get("order_id"):
+            raise ServiceError("order_case_mismatch", "PayPal order does not belong to this assessment case.")
+        st.external_paypal = copy.deepcopy(order_record)
+        st.fixture["paypal_order"] = copy.deepcopy(order_record.get("order") or {})
+        st.fixture["order_ref"] = order_record.get("order_id")
+        self._persist_state(st)
+
     # -- evidence
     def add_artifact(self, ref: str, text: str, kind: str = "OTHER", source_label: str = "Pasted text") -> ArtifactRecord:
         st = self._state(ref)
-        return self._add(st, text, kind, source_label, self.now(), fixture=False)
+        rec = self._add(st, text, kind, source_label, self.now(), fixture=False)
+        self._persist_state(st)
+        return rec
 
     def _add(self, st: TransactionState, text: Any, kind: str, source_label: str, at: str, fixture: bool) -> ArtifactRecord:
         if not isinstance(text, str) or not text.strip():
@@ -196,7 +273,11 @@ class DeliveryGateService:
             raise ServiceError("evidence_too_long", f"Evidence is limited to {MAX_TEXT_CHARS:,} characters in this demo.")
         if kind not in ARTIFACT_KINDS:
             raise ServiceError("invalid_kind", f"Evidence type must be one of: {', '.join(ARTIFACT_KINDS)}.")
-        sample = self._corpus.get(_norm_text(text))
+        normalised_input = _norm_text(text)
+        for existing in st.artifacts.values():
+            if _norm_text(existing.artifact.text) == normalised_input and existing.artifact.declared_kind == kind:
+                return existing
+        sample = self._corpus.get(normalised_input)
         if sample:                                                  
             aid, canonical_text = sample["id"], sample["text"]
             kind = sample["kind"] if fixture else kind
@@ -231,7 +312,9 @@ class DeliveryGateService:
     # -- review (the bridge is the authority on what a reviewer may do; this method only asks it)
     def review_artifact(self, ref: str, artifact_id: str, mode: str, reviewer: str, note: str = "", fact_id: Optional[str] = None) -> Dict[str, Any]:
         st = self._state(ref)
-        return self._review(st, artifact_id, mode, reviewer, note, self.now(), fixture=False, fact_id=fact_id)
+        result = self._review(st, artifact_id, mode, reviewer, note, self.now(), fixture=False, fact_id=fact_id)
+        self._persist_state(st)
+        return result
 
     def _review(self, st: TransactionState, aid: str, mode: str, reviewer: Any, note: str, at: str, fixture: bool, fact_id: Optional[str] = None) -> Dict[str, Any]:
         if mode not in REVIEW_MODES:
@@ -322,6 +405,7 @@ class DeliveryGateService:
                 m["answers"][k] = v
         st.merchant = m
         self._event(st, self.now(), "ANSWERS_UPDATED", "Information provided by the merchant was updated", False)
+        self._persist_state(st)
 
     def set_entity(self, ref: str, entity_ref: Optional[str]) -> None:
         st = self._state(ref)
@@ -332,6 +416,7 @@ class DeliveryGateService:
             raise ServiceError("unknown_entity", f"The evidence does not mention order {entity_ref!r}.")
         st.entity_ref = entity_ref
         self._event(st, self.now(), "ORDER_SELECTED", f"Evidence for order {entity_ref} selected", False)
+        self._persist_state(st)
 
     # -- analysis
     def _event(self, st: TransactionState, at: str, kind: str, text: str, fixture: bool) -> None:
@@ -359,7 +444,7 @@ class DeliveryGateService:
 
     def _paypal(self, st: TransactionState):
         fx = st.fixture
-        order = pp_adapter.observe_order(fx["paypal_order"], origin="FIXTURE")
+        order = pp_adapter.observe_order(fx["paypal_order"], origin="SANDBOX" if st.external_paypal else "FIXTURE")
         cap = order.select_capture()
         disp = pp_disputes.observe_dispute(fx["paypal_dispute"], origin="FIXTURE") if fx.get("paypal_dispute") else None
         country = merchant_jurisdiction_fact(st.merchant.get("country"), source_ref=f"merchant:{st.ref}")
@@ -387,7 +472,11 @@ class DeliveryGateService:
         a = None if needs else self._assess(self.registry, br.case)
         members = [f for r in st.artifacts.values() for f in r.facts]
         contra = contradictions.detect(members, st.ref)
-        return Analysis(ref, st, cap, disp, handoff, pp_exposure.build_exposure(cap, disp), base, br, a, contra, candidates, entities, needs)
+        result = Analysis(ref, st, cap, disp, handoff, pp_exposure.build_exposure(cap, disp), base, br, a, contra, candidates, entities, needs)
+        if st.external_paypal:
+            st.validation_snapshot = {"assessment": a, "contradictions": contra, "needs_entity_choice": needs, "computed_at": self.now()}
+            self._persist_state(st, invalidate=False)
+        return result
 
     def list_analyses(self) -> List[Analysis]:
         return [self.analyze(r) for r in self.refs()]

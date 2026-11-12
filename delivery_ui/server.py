@@ -12,6 +12,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 from delivery_ui import presenter as P
 from delivery_ui import render as R
 from delivery_ui.live import LiveError, LiveSandboxService
+from delivery_ui.checkout import CheckoutError, SandboxCheckoutService
 from delivery_ui.service import DeliveryGateService, NotFound, ServiceError
 
 STATIC = Path(__file__).resolve().parent / "static"
@@ -44,10 +45,16 @@ class BadRequest(ServiceError):
 
 
 class App:
-    def __init__(self, service: Optional[DeliveryGateService] = None, live: Optional[LiveSandboxService] = None):
-        self.svc = service or DeliveryGateService()
+    def __init__(self, service: Optional[DeliveryGateService] = None, live: Optional[LiveSandboxService] = None, checkout: Optional[SandboxCheckoutService] = None):
+        self.checkout = checkout or SandboxCheckoutService()
+        self.svc = service or DeliveryGateService(db_path=self.checkout.db_path)
         self.live = live or LiveSandboxService()
         self.lock = threading.RLock()
+        # Rehydrate the stable PayPal-order -> assessment-case association after restart.
+        for order in self.checkout.orders.values():
+            case_id = order.get("case_id")
+            if case_id:
+                self.svc.register_paypal_case(case_id, order)
 
     # -- entry point -----------------------------------------------------------------------------------------------------------------
     def handle(self, method: str, raw_path: str, body: bytes = b"", content_type: str = "") -> Response:
@@ -100,8 +107,10 @@ class App:
                 return _html(200, R.page_overview(rows, P.counters(rows), flash))
             if path == "/payments":
                 return self._payments(q, flash)
+            if path == "/live/return":
+                return _redirect(R.url("/live", msg="Returned from PayPal. Retrieve the order to confirm its current status.", level="ok"))
             if path == "/live":
-                return _html(200, R.page_live(self.live.configured(), self.live.history, flash))
+                return _html(200, R.page_live(self.live.configured(), self.live.history, flash, checkout_configured=self.checkout.configured(), orders=list(self.checkout.orders.values())))
             if path == "/api/live":
                 return _json(200, {"origin": "LIVE_SANDBOX", "configured": self.live.configured(), "observations": self.live.history})
             m = re.fullmatch(r"/payments/([^/]+)", path)
@@ -216,6 +225,42 @@ class App:
         if path in ("/reset", "/api/reset"):
             svc.reset()
             return _json(200, {"ok": True}) if api else _redirect("/")
+        if path in ("/api/live/orders", "/live/orders"):
+            f = self._fields(body, ctype, {"amount", "currency", "description"})
+            base = "http://127.0.0.1:8080"
+            try:
+                rec = self.checkout.create(f.get("amount", ""), f.get("currency", "USD"), f.get("description", ""), base + "/live/return", base + "/live?cancelled=1")
+                case_id = rec["case_id"]
+                self.svc.register_paypal_case(case_id, rec)
+                self.checkout.bind_case(rec["order_id"], case_id)
+            except CheckoutError as e:
+                if api: return _json(400 if e.code.startswith("invalid") or e.code == "not_configured" else 502, {"error":e.code,"message":str(e),"http_status":e.status,"paypal_debug_id":e.debug_id})
+                return _redirect(R.url("/live", msg=str(e)[:250], level="error"))
+            return _json(201, rec) if api else _redirect(R.url("/live", msg="Sandbox order created. Open the PayPal approval link.", level="ok"))
+        if path in ("/api/live/orders/retrieve", "/live/orders/retrieve"):
+            f = self._fields(body, ctype, {"order_id"})
+            try:
+                order_id = f.get("order_id", "")
+                case_id = self.checkout.get_case_id(order_id)
+                if not case_id: raise CheckoutError("order_case_not_found", "This order was not created and associated by this Delivery Gate application.")
+                rec = self.checkout.retrieve(order_id)
+                self.svc.update_paypal_case(case_id, self.checkout.orders[order_id])
+            except CheckoutError as e:
+                if api: return _json(502, {"error":e.code,"message":str(e),"http_status":e.status,"paypal_debug_id":e.debug_id})
+                return _redirect(R.url("/live", msg=str(e)[:250], level="error"))
+            return _json(200, rec) if api else _redirect(R.url("/live", msg="Order retrieved from PayPal Sandbox.", level="ok"))
+        if path in ("/api/live/orders/capture", "/live/orders/capture"):
+            f = self._fields(body, ctype, {"order_id"})
+            try:
+                order_id = f.get("order_id", "")
+                case_id = self.checkout.get_case_id(order_id)
+                if not case_id: raise CheckoutError("order_case_not_found", "This order was not created and associated by this Delivery Gate application.")
+                rec = self.checkout.capture(order_id)
+                self.svc.update_paypal_case(case_id, self.checkout.orders[order_id])
+            except CheckoutError as e:
+                if api: return _json(409 if e.code in ("already_captured","order_not_approved","order_case_not_found") else 502, {"error":e.code,"message":str(e),"http_status":e.status,"paypal_debug_id":e.debug_id})
+                return _redirect(R.url("/live", msg=str(e)[:250], level="error"))
+            return _json(200, rec) if api else _redirect(R.url("/live", msg="PayPal confirmed the capture.", level="ok"))
         if path in ("/live/observe", "/api/live/observe"):
             f = self._fields(body, ctype, {"kind", "resource_id", "select"})
             try:

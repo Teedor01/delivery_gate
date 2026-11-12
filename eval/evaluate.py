@@ -65,12 +65,16 @@ def evaluate(run: ExtractionRun) -> Dict[str, Any]:
         c["halluc"] += sum(1 for x in rep.rejected if _is_halluc(x.reasons))
         used: set = set()
         a_matched = 0
+        missing_gold: List[Dict[str, Any]] = []
         for g in gold["facts"]:
             hit = next((a for a in acc if a.fact_id not in used and a.fact == g["fact"] and a.entity_ref == g["entity_ref"]
                         and a.normalized_value == g["normalized_value"]), None)
             if hit:
                 used.add(hit.fact_id); c["matched"] += 1; a_matched += 1
                 c["span_ok"] += int(g["span_contains"] in hit.source_span and hit.span_end - hit.span_start == len(hit.source_span))
+            else:
+                missing_gold.append({"fact": g["fact"], "entity_ref": g["entity_ref"],
+                                     "normalized_value": g["normalized_value"], "span_contains": g["span_contains"]})
             cp = _counterpart(g, acc)
             if cp:
                 c["norm_tot"] += 1; c["norm_ok"] += int(any(a.normalized_value == g["normalized_value"] for a in cp))
@@ -85,7 +89,11 @@ def evaluate(run: ExtractionRun) -> Dict[str, Any]:
                                                            for g in gold["facts"]))
         viol = [a.fact_id for a in acc if any(_violates(m, a) for m in gold["must_not_extract"])]
         c["must_not"] += len(viol)
-        per[aid] = {"gold": len(gold["facts"]), "accepted": len(acc), "rejected": len(rep.rejected), "must_not_violations": viol}
+        per[aid] = {"gold": len(gold["facts"]), "accepted": len(acc), "rejected": len(rep.rejected),
+                    "must_not_violations": viol, "missing_gold_facts": missing_gold,
+                    "rejected_details": [{"fact": x.raw.get("fact"), "value": x.raw.get("value"),
+                                          "source_span": x.raw.get("source_span"), "reasons": list(x.reasons)}
+                                         for x in rep.rejected]}
     def ratio(n, d): return 1.0 if d == 0 else round(n / d, 4)
     found = {(x.group_id, x.fact, tuple(sorted({v["artifact_id"] for v in x.values}))) for x in run.contradictions}
     expected = {(e["group"], e["fact"], tuple(sorted(e["artifacts"]))) for e in EXPECTED_CONTRADICTIONS}

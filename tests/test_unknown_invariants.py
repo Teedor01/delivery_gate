@@ -1,4 +1,3 @@
-"""Audit correction 7: UNKNOWN is never transformed into PASS through defaults."""
 import unittest
 from delivery_gate.models import Provenance, ProvStatus, SourceType
 from tests.helpers import *

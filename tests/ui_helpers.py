@@ -1,4 +1,3 @@
-"""Helpers for the Phase 4 UI tests."""
 import json
 import re
 import threading
@@ -26,9 +25,22 @@ DOC = json.loads(Path(FIXTURE_PATH).read_text())
 REFS = [t["ref"] for t in DOC["transactions"]]
 FIXED = datetime(2026, 11, 3, 12, 0, 0, tzinfo=timezone.utc)
 
+def offline_extractor_factory(artifact, recognized):
+    """Keep UI tests independent of locally configured live model credentials."""
+    if recognized:
+        return RecordedExtractor(RECORDED_DIR), RecordedExtractor.KIND, None
+
+    return (
+        None,
+        None,
+        "No extraction model is configured in this environment, so this text "
+        "could not be read automatically. Only the built-in sample evidence "
+        "can be read offline.",
+    )
 
 def fresh(**kw):
     kw.setdefault("clock", lambda: FIXED)
+    kw.setdefault("extractor_factory", offline_extractor_factory)
     return DeliveryGateService(**kw)
 
 

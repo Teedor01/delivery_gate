@@ -1,18 +1,3 @@
-"""Explicitly invoked PayPal SANDBOX test workflow: create an order, print the buyer approval link, capture after approval.
-
-This is NOT part of the read-only adapter (paypal_adapter/) and nothing imports it. It exists so a real captured sandbox payment can
-be produced for Delivery Gate to observe. It can only contact api-m.sandbox.paypal.com, never follows redirects, and never prints or
-saves credentials or tokens. The buyer approval step cannot be skipped: PayPal requires a sandbox buyer to approve the order.
-
-    python3 -m tools.sandbox_order_flow create  [--amount 10.00] [--currency USD] [--return-url URL] [--cancel-url URL]
-    python3 -m tools.sandbox_order_flow status  ORDER_ID
-    python3 -m tools.sandbox_order_flow capture ORDER_ID --yes-capture
-
-Documented flow (PayPal Orders v2): POST /v2/checkout/orders (intent CAPTURE) -> open the "payer-action" link (or "approve" on older
-payloads) while signed in to a SANDBOX PERSONAL (buyer) account -> POST /v2/checkout/orders/{id}/capture once status is APPROVED.
-Capture on an order that is not APPROVED fails with ORDER_NOT_APPROVED; that error is reported, not worked around.
-Then: python3 -m paypal_adapter.sandbox_check --order ORDER_ID --save live_captures
-"""
 from __future__ import annotations
 
 import argparse
@@ -45,8 +30,10 @@ class Flow:
             parsed = {}
         return status, hdrs.get("paypal-debug-id"), parsed
 
-    def create(self, amount: str, currency: str, return_url: str, cancel_url: str):
-        body = {"intent": "CAPTURE", "purchase_units": [{"amount": {"currency_code": currency, "value": amount}}],
+    def create(self, amount: str, currency: str, return_url: str, cancel_url: str, description: str = ""):
+        unit = {"amount": {"currency_code": currency, "value": amount}}
+        if description: unit["description"] = description[:127]
+        body = {"intent": "CAPTURE", "purchase_units": [unit],
                 "payment_source": {"paypal": {"experience_context": {"payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED", "user_action": "PAY_NOW",
                                                                     "return_url": return_url, "cancel_url": cancel_url}}}}
         return self._call("POST", "/v2/checkout/orders", body, str(uuid.uuid4()))

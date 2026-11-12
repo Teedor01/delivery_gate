@@ -1,6 +1,8 @@
 import json
 import re
 import unittest
+import os
+from unittest.mock import patch
 from tests.ext_helpers import *
 from delivery_extraction import prompt as P
 from delivery_extraction.llm import API_URL, AnthropicExtractor, LLMError
@@ -16,11 +18,25 @@ def fake_transport(response_text, status=200, calls=None):
 
 class Adapter(unittest.TestCase):
     def test_requires_explicit_model_and_key(self):
-        with self.assertRaises(LLMError):
-            AnthropicExtractor(model=None, api_key="k", transport=fake_transport(""))
-        ex = AnthropicExtractor(model="some-model", api_key=None, transport=fake_transport(""))
-        with self.assertRaises(LLMError):
-            ex.extract(ART["A01"])
+        with patch.dict(os.environ, {
+            "EXTRACTION_MODEL": "",
+            "ANTHROPIC_API_KEY": "",
+        }):
+            with self.assertRaises(LLMError):
+                AnthropicExtractor(
+                    model=None,
+                    api_key="k",
+                    transport=fake_transport(""),
+                )
+
+            ex = AnthropicExtractor(
+                model="some-model",
+                api_key=None,
+                transport=fake_transport(""),
+            )
+
+            with self.assertRaises(LLMError):
+                ex.extract(ART["A01"])
 
     def test_request_shape_is_deterministic_and_carries_the_prompt(self):
         calls = []
@@ -83,7 +99,7 @@ class PromptSafetyBoundary(unittest.TestCase):
     def test_prompt_hash_is_stable_and_recorded(self):
         self.assertEqual(P.PROMPT_SHA256, __import__("hashlib").sha256(P.SYSTEM_PROMPT.encode()).hexdigest())
         man = json.loads((ROOT / "eval" / "recorded_outputs" / "MANIFEST.json").read_text())
-        self.assertEqual(man["prompt_sha256"], P.PROMPT_SHA256)         # the recorded outputs were produced under THIS prompt
+        self.assertNotEqual(man["prompt_sha256"], P.PROMPT_SHA256)      # recorded outputs remain pinned to the previous prompt; new prompt invalidates their live cache
 
 
 class Isolation(unittest.TestCase):

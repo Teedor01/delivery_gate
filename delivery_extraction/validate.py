@@ -90,16 +90,45 @@ def _model_authored_strings(f: Dict[str, Any]) -> List[str]:
     return out
 
 
-def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str]) -> None:
+def _unknown_has_cue(fact: str, span: str, context: Optional[str] = None) -> bool:
+    cues = {
+        "tracking_number": r"\b(track(?:ing)?|waybill|consignment)\b",
+        "carrier_name": r"\b(carrier|courier|shipped|shipment|tracking)\b",
+        "delivery_status": r"\b(delivered|delivery|arrived|arrival|got there|reached|in transit|out for delivery|returned)\b",
+        "delivery_date": r"\b(deliver(?:ed|y)?|arriv(?:ed|al)?|ship(?:ped|ment)?|dispatch(?:ed)?)\b|\b(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|\b\d{1,2}(?:st|nd|rd|th)?\b|\b(around|about|approximately)\s+the?\s+\d{1,2}(st|nd|rd|th)?\b",
+        "shipment_date": r"\b(ship(?:ped|ment)?|dispatch(?:ed)?|sent)\b|\b(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|\b\d{1,2}\b",
+        "delivery_time": r"\b(deliver(?:ed|y)?|arriv(?:ed|al)?)\b|\b(am|pm|noon|midnight)\b|\b\d{1,2}:\d{2}\b",
+        "recipient_address": r"\b(deliver(?:ed|y)? to|left at|received at|redirect(?:ed)? to)\b",
+        "intended_ship_to_address": r"\b(ship(?:ped|ping)? to|intended for|supposed to go)\b",
+        "signature_present": r"\b(sign(?:ed|ature)?|nobody signed|no signature)\b",
+        "redirect_reported": r"\b(redirect(?:ed|ion)?|re-rout(?:ed|ing)|divert(?:ed|ion)|forward(?:ed|ing))\b",
+        "order_reference": r"(?:order|reference|ref\.?|#)\s*[:#-]?\s*[A-Za-z0-9-]+",
+    }
+    pattern = cues.get(fact)
+    if pattern and re.search(pattern, span, re.I):
+        return True
+    # Some models select only the uncertain value as source_span. Permit the cue in
+    # the artifact only when that span itself has the expected value shape.
+    if context:
+        if fact == "tracking_number" and re.fullmatch(r"[A-Za-z0-9-]{8,40}", span.strip()) and re.search(r"\b(track(?:ing)?|waybill|consignment)\b", context, re.I):
+            return True
+        if fact == "delivery_date" and re.search(r"\b(?:\d{1,2}(?:st|nd|rd|th)?|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*|mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b", span, re.I) and re.search(r"\b(deliver|delivery|arriv|got there|around|about|shipped)\b", context, re.I):
+            return True
+    return False
+
+
+def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str], context: Optional[str] = None) -> None:
     spec = FACT_VOCAB[f["fact"]]
     typ, nv, value = spec["type"], f["normalized_value"], f["value"]
     if nv == UNKNOWN:
         if f["ambiguity"] is not True:
             reasons.append("UNKNOWN_WITHOUT_AMBIGUITY")
+        if not _unknown_has_cue(f["fact"], span, context):
+            reasons.append("UNGROUNDED_UNKNOWN_FACT")
         return                                           
     if value == UNKNOWN:
         reasons.append("VALUE_UNKNOWN_BUT_NORMALIZED_SET")
-    elif norm_text(value) not in norm_text(span):
+    elif typ != "bool" and norm_text(value) not in norm_text(span):
         reasons.append("VALUE_NOT_IN_SPAN")
     if typ == "string":
         if not isinstance(nv, str) or not nv:
@@ -108,7 +137,8 @@ def _check_grounding(f: Dict[str, Any], span: str, reasons: List[str]) -> None:
             if nv != alnum_upper(value) or alnum_upper(value) not in alnum_upper(span) or not re.fullmatch(r"[A-Z0-9]{8,40}", nv):
                 reasons.append("UNGROUNDED_TRACKING_NUMBER")
         elif f["fact"] == "order_reference":
-            if norm_text(nv) not in norm_text(span):
+            canonical = re.sub(r"^#", "", str(value).strip())
+            if nv != canonical or norm_text(nv) not in norm_text(span):
                 reasons.append("UNGROUNDED_ORDER_REFERENCE")
         elif norm_text(nv) != norm_text(value):
             reasons.append("UNGROUNDED_STRING")
@@ -160,6 +190,21 @@ def _validate_fact(f: Any, artifact: Artifact, seen_ids: set) -> Tuple[Optional[
         return None, reasons
     if f["fact"] not in FACT_VOCAB:
         reasons.append("FACT_NOT_IN_VOCABULARY")
+        # Some model responses encode address objects as JSON strings.
+    # Parse them, then subject them to the normal strict address checks.
+    if (
+        f["fact"] in FACT_VOCAB
+        and FACT_VOCAB[f["fact"]]["type"] == "address"
+        and isinstance(f["normalized_value"], str)
+        and f["normalized_value"] != UNKNOWN
+    ):
+        try:
+            parsed_address = json.loads(f["normalized_value"])
+        except (ValueError, TypeError):
+            parsed_address = None
+
+        if isinstance(parsed_address, dict):
+            f["normalized_value"] = parsed_address    
     if any(FORBIDDEN.search(s) for s in _model_authored_strings(f)):
         reasons.append("FORBIDDEN_POLICY_LANGUAGE")
     if not isinstance(f["fact_id"], str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,20}", f["fact_id"]):
@@ -180,6 +225,14 @@ def _validate_fact(f: Any, artifact: Artifact, seen_ids: set) -> Tuple[Optional[
         reasons.append("BAD_AMBIGUITY_NOTE")
     if f["entity_ref"] is not None and (not isinstance(f["entity_ref"], str) or f["entity_ref"] not in artifact.text):
         reasons.append("ENTITY_REF_NOT_IN_ARTIFACT")
+    if f["fact"] == "order_reference" and isinstance(f["value"], str):
+        canonical_ref = re.sub(r"^#", "", f["value"].strip())
+        if f["normalized_value"] != canonical_ref:
+            reasons.append("ORDER_REFERENCE_NOT_CANONICAL")
+        if f["entity_ref"] is not None and f["entity_ref"] != canonical_ref:
+            reasons.append("ORDER_ENTITY_REF_NOT_CANONICAL")
+    if artifact.declared_kind in ("MERCHANT_STATEMENT", "CUSTOMER_MESSAGE") and f["attribution"] == "CARRIER_STATEMENT":
+        reasons.append("CARRIER_ATTRIBUTION_ON_NON_CARRIER_ARTIFACT")
     if not isinstance(f["value"], str):
         reasons.append("BAD_TYPE")
     span = f["source_span"]
@@ -201,7 +254,7 @@ def _validate_fact(f: Any, artifact: Artifact, seen_ids: set) -> Tuple[Optional[
         reasons.append("ATTRIBUTION_CONTRADICTS_SPAN")
     if RELAYED_CUE.search(span) and f["attribution"] not in ("CUSTOMER_STATEMENT_RELAYED", "UNKNOWN"):
         reasons.append("RELAYED_STATEMENT_MISATTRIBUTED")
-    _check_grounding(f, span, reasons)
+    _check_grounding(f, span, reasons, artifact.text)
     if reasons:
         return None, reasons
     seen_ids.add(f["fact_id"])

@@ -125,6 +125,19 @@ def page_detail(d: Dict[str, Any], tab: str, extra: Dict[str, Any], flash: Optio
             f'<div class="ph status tone-{esc(ps["tone"])}"><small>Payment status</small><strong>{icon("check", 22) if ps["tone"] == "green" else ""}{esc(ps["label"])}</strong></div></section>')
     cta = button("View detailed assessment", pay_url(ref, "assessment"), "secondary", "chev") if tab != "assessment" else ""
     ban = banner(d["overall"], cta)
+    live_tx = d.get("live_paypal")
+    live_capture = live_tx.get("capture") or {} if live_tx else {}
+    capture_rows = live_capture.get("captures", [])
+    capture_summary = " · ".join(filter(None, [
+        f"Capture status: {capture_rows[0].get('status')}" if capture_rows and capture_rows[0].get("status") else None,
+        f"Amount: {capture_rows[0].get('amount', {}).get('value')} {capture_rows[0].get('amount', {}).get('currency_code')}" if capture_rows and capture_rows[0].get("amount") else None,
+        f"Seller protection: {capture_rows[0].get('seller_protection', {}).get('status')}" if capture_rows and capture_rows[0].get("seller_protection", {}).get("status") else None,
+    ]))
+    live_panel = (f'<section class="card"><h3>Actual PayPal Sandbox transaction</h3><p>Order ID: <strong>{esc(live_tx.get("order_id"))}</strong> · Status: <strong>{esc(live_tx.get("status"))}</strong></p>'
+                  f'<p>Capture ID(s): {esc(", ".join(c.get("id", "") for c in capture_rows) or "Not captured")}</p>'
+                  f'<p>{esc(capture_summary or "Capture details are not available yet.")}</p>'
+                  f'<details><summary>PayPal API transaction response</summary><pre>{esc(json.dumps(live_tx.get("order", {}), indent=2))}</pre></details>'
+                  f'<details><summary>PayPal capture API response</summary><pre>{esc(json.dumps(live_capture.get("capture_response", {}), indent=2))}</pre></details></section>') if live_tx else ""
     scenario = ""
     if d["scenario"]["numbers"]:
         scenario = (f'<div class="scenario" data-testid="scenario-note"><span class="tag">Demo scenario {", ".join(str(n) for n in d["scenario"]["numbers"])}</span>'
@@ -134,7 +147,7 @@ def page_detail(d: Dict[str, Any], tab: str, extra: Dict[str, Any], flash: Optio
     content = {"evidence": _tab_evidence, "assessment": _tab_assessment, "whatif": _tab_whatif, "provenance": _tab_provenance}[tab](d, extra)
     right = _summary_card(d) + _next_steps_card(d)
     body = (page_title("Payment Overview", "A complete view of your payment, evidence and assessment.", ("/payments", "Back to Payments"))
-            + scenario + f'<div class="detail-grid"><div class="col-main">{head}{ban}{info}<nav class="tabs" aria-label="Sections">{tabs}</nav>'
+            + scenario + live_panel + f'<div class="detail-grid"><div class="col-main">{head}{ban}{info}<nav class="tabs" aria-label="Sections">{tabs}</nav>'
             f'<div class="tabpane" data-testid="tabpane-{tab}">{content}</div></div><div class="col-side">{right}</div></div>')
     return shell(f"{ref} · Payment", "payments", body, flash=flash)
 
@@ -531,10 +544,28 @@ def page_error(code: int, title: str, message: str) -> str:
                  f'<p>{button("Back to Payments", "/payments", "primary")}</p></div>')
 
 
-def page_live(configured: bool, history: List[Dict[str, Any]], flash: Optional[Dict[str, str]] = None, error: Optional[Dict[str, Any]] = None) -> str:
+def page_live(configured: bool, history: List[Dict[str, Any]], flash: Optional[Dict[str, str]] = None, error: Optional[Dict[str, Any]] = None, checkout_configured: bool = False, orders: Optional[List[Dict[str, Any]]] = None) -> str:
     """Read-only live PayPal SANDBOX observations. Separate from the fixture payments; never assessed here."""
     cfg = ('<span class="pill tone-green" data-testid="live-configured">Sandbox credentials present in the server environment</span>' if configured else
            '<span class="pill tone-slate" data-testid="live-not-configured">No sandbox credentials in the server environment. Nothing can be fetched.</span>')
+    orders = orders or []
+    checkout_badge = ('<span class="pill tone-green">Sandbox checkout ready</span>' if checkout_configured else '<span class="pill tone-slate">Sandbox checkout credentials unavailable</span>')
+    checkout = (f'<section class="card"><h3>Create a PayPal Sandbox order</h3>{checkout_badge}'
+                '<p class="muted small">Creates a real Sandbox order only when submitted. Approval opens on PayPal; capture is a separate, explicit action.</p>'
+                '<form method="post" action="/live/orders"><label>Amount <input name="amount" type="number" min="0.01" step="0.01" value="10.00" required></label> '
+                '<label>Currency <input name="currency" value="USD" maxlength="3" required></label> '
+                '<label>Description <input name="description" maxlength="127" value="Delivery Gate demo order"></label> '
+                f'<button class="btn btn-primary" type="submit"{"" if checkout_configured else " disabled"}>Create Sandbox order</button></form></section>')
+    order_cards = []
+    for rec in orders:
+        oid = esc(rec.get("order_id", "")); approval = rec.get("approval_url")
+        link = f'<p><a class="btn btn-primary" href="{esc(approval)}" target="_blank" rel="noopener">Approve on PayPal</a></p>' if approval else '<p class="muted small">PayPal did not return an approval link.</p>'
+        case_link = f'<p><a href="/payments/{esc(rec.get("case_id"))}">Open Delivery Gate assessment {esc(rec.get("case_id"))}</a></p>' if rec.get("case_id") and rec.get("capture") else ''
+        order_cards.append(f'<section class="card"><h3><span class="pill tone-amber">LIVE_SANDBOX</span> Order {oid}</h3><p>Status: <strong>{esc(rec.get("status"))}</strong> · {esc(rec.get("amount"))} {esc(rec.get("currency"))}</p>{case_link}{link}'
+                           f'<form method="post" action="/live/orders/retrieve"><input type="hidden" name="order_id" value="{oid}"><button class="btn" type="submit">Retrieve order</button></form> '
+                           f'<form method="post" action="/live/orders/capture"><input type="hidden" name="order_id" value="{oid}"><button class="btn btn-primary" type="submit">Capture approved order</button></form>'
+                           + (''.join(f'<p>Capture ID: {esc(c.get("id"))} · Status: {esc(c.get("status"))} · Amount: {esc(c.get("amount",{}).get("value"))} {esc(c.get("amount",{}).get("currency_code"))} · Seller protection: {esc(c.get("seller_protection",{}).get("status","not returned"))}</p>' for c in rec.get('capture',{}).get('captures',[])) + f'<details><summary>Actual PayPal capture response</summary><pre>{esc(json.dumps(rec.get("capture",{}).get("capture_response",{}), indent=2))}</pre></details>' if rec.get('capture') else '')
+                           + f'<details><summary>PayPal order response</summary><pre>{esc(json.dumps(rec.get("order",{}), indent=2))}</pre></details></section>')
     form = (f'<form method="post" action="/live/observe" class="card" data-testid="live-form"><h3>Retrieve from the PayPal sandbox</h3>{cfg}'
             '<p class="muted small">A read-only GET to api-m.sandbox.paypal.com. Nothing is created, captured or changed. The result is shown exactly as PayPal returned it.</p>'
             '<label>Resource <select name="kind"><option value="capture">Capture</option><option value="order">Order</option></select></label> '
@@ -557,4 +588,4 @@ def page_live(configured: bool, history: List[Dict[str, Any]], flash: Optional[D
                      f'<p class="muted small">Absent from the response (unknown, not assumed): {absent}.</p>'
                      '<p class="muted small">This is an observation, not an assessment. PayPal status values are opaque. A sandbox response is not evidence of Seller Protection eligibility.</p></section>')
     empty = '' if cards else '<div class="card empty" data-testid="live-empty"><h3>No live observations yet</h3><p>Nothing has been retrieved in this session. Fixture payments elsewhere in the app are not live data.</p></div>'
-    return shell("Live sandbox", "live", page_title("Live sandbox", "Real PayPal sandbox responses, kept apart from fixture payments.") + form + err + empty + "".join(cards))
+    return shell("Live sandbox", "live", page_title("Live sandbox", "Real PayPal sandbox responses, kept apart from fixture payments.") + checkout + "".join(order_cards) + form + err + empty + "".join(cards))

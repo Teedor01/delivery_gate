@@ -566,7 +566,7 @@ def detail(svc: DeliveryGateService, an: Analysis) -> Dict[str, Any]:
                 unknown_inputs.append(k)
     return {"ref": an.ref, "order_ref": fx["order_ref"], "merchant_name": svc.merchant_name, "overall": ov, "summary": summary_row(an),
             "scenario": {"title": fx["scenario_title"], "summary": fx["scenario_summary"], "numbers": fx["scenarios"]},
-            "paypal": _paypal_view(an), "merchant": _merchant_view(an), "conditions": conditions_view(svc, an), "exposure": exposure_view(an), "gates": gates, "requirements": reqs,
+            "paypal": _paypal_view(an), "live_paypal": an.state.external_paypal, "merchant": _merchant_view(an), "conditions": conditions_view(svc, an), "exposure": exposure_view(an), "gates": gates, "requirements": reqs,
             "evidence": arts, "contradictions": contradictions_view(an), "missing": missing, "statement_only": uncorr,
             "next_steps": next_steps(reqs, an, ov), "unknown_inputs": unknown_inputs,
             "display_notice": a.display_notice if a else UNREVIEWED_NOTICE, "policy_status": a.policy_status if a else "UNREVIEWED",
